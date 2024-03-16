@@ -1,0 +1,27 @@
+{
+  "auth": "zef:tbrowder",
+  "authors": [
+    "Tom Browder"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+    "Text::Utils"
+  ],
+  "description": "A simple CSV file reader",
+  "license": "Artistic-2.0",
+  "name": "CSV::Parser::Simple",
+  "perl": "6.d",
+  "provides": {
+    "CSV::Parser::Simple": "lib/CSV/Parser/Simple.rakumod"
+  },
+  "resources": [
+  ],
+  "source-url": "https://github.com/tbrowder/CSV-Parser-Simple.git",
+  "tags": [
+    "text csv file read reader"
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.1"
+}
