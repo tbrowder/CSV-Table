@@ -5,9 +5,9 @@ use Text::Utils :strip-comment, :normalize-text;
 has $.csv is required;
 # options
 #   separator
-has $.separator = 'auto'; # auto, comma, pipe, semicolon
+has $.separator    = 'auto'; # auto, comma, pipe, semicolon
 #   normalize
-has $.normalize = True;
+has $.normalize    = True;
 #   comment-char
 has $.comment-char = '#';
 
@@ -29,44 +29,43 @@ submethod TWEAK() {
     my $schar = $!separator;
 
     # get the raw lines while collecting some info
-    my $header = 0;
+    my $header;
     my @lines;
 
     LINE: for $!csv.IO.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         $line = strip-comment $line, :mark($cchar);
         next LINE if $line !~~ /\S/; # skip blank lines
-
-        if not ($header and $header.defined) {
-            $header = $line;
-            if $!separator ~~ /:i auto/ {
-                note "DEBUG: separator = $!separator" if $debug;
-                my %c;
-                # count currently known chars [,;|]
-                CHAR: for $header.comb -> $c {
-                    # $c must be a currently know sepchar
-                    next CHAR unless $c ~~ /<[,;|]>/;
-                    if %c{$c}:exists {
-                        %c{$c} += 1;
-                    }
-                    else {
-                        %c{$c} = 1;
-                    }
-                }
-                # use the one most seen
-                my ($C, $V) = "", 0;
-                for %c.kv -> $c, $v {
-                    if $v > $V {
-                        $C = $c;
-                    }
-                }
-                $!separator = $C;
-                $schar = $C;
-            }
-            next LINE;
-        }
         @lines.push: $line;
-        next LINE;
+    }
+
+    # determine the separator
+    $header = @lines.shift;
+
+    if $!separator ~~ /:i auto / {
+        note "DEBUG: separator = $!separator" if $debug;
+        my %c;
+        # count currently known chars [,;|]
+        CHAR: for $header.comb -> $c {
+            # $c must be a currently know sepchar
+            next CHAR unless $c ~~ /<[,;|]>/;
+            if %c{$c}:exists {
+                %c{$c} += 1;
+            }
+            else {
+                %c{$c} = 1;
+            }
+        }
+        # use the one most seen
+        my ($C, $V) = "", 0;
+        for %c.kv -> $c, $v {
+            if $v > $V {
+                $C = $c;
+                $V = $v;
+            }
+        }
+        $!separator = $C;
+        $schar = $C;
     }
 
     note "DEBUG: sepchar = $!separator" if 0 or $debug;
