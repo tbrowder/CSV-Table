@@ -8,7 +8,7 @@ B<CSV::Table> - Provides routines for manipulating a CSV file with a header row
 
 =begin code :lang<raku>
 use CSV::Table;
-my $t = CSV::Table.new: $my-csv;
+my $t = CSV::Table.new: :csv($my-csv-file);
 say $t.fields.elems;
 say $t.lines.elems;
 for $t.lines.kv -> $i, $line {
@@ -80,7 +80,7 @@ It cannot handle:
 =head2 Constructor signature
 
 =begin code
-CSV::Table.new: $csv-file-name, :separator='auto', :normalize=True, :comment-char='#')
+CSV::Table.new: :$csv, :separator='auto', :normalize=True, :comment-char='#')
 =end code
 
 Following are the allowable values for the named arguments. The user

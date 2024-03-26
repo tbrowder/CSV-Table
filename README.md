@@ -10,7 +10,7 @@ SYNOPSIS
 
 ```raku
 use CSV::Table;
-my $t = CSV::Table.new: $my-csv;
+my $t = CSV::Table.new: :csv($my-csv-file);
 say $t.fields.elems;
 say $t.lines.elems;
 for $t.lines.kv -> $i, $line {
@@ -72,7 +72,7 @@ It cannot handle:
 Constructor signature
 ---------------------
 
-    CSV::Table.new: $csv-file-name, :separator='auto', :normalize=True, :comment-char='#')
+    CSV::Table.new: :$csv, :separator='auto', :normalize=True, :comment-char='#')
 
 Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified, and it can be added and tested for.
 
