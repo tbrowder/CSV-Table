@@ -22,7 +22,7 @@ for $t.lines.kv -> $i, $line {
 DESCRIPTION
 ===========
 
-**CSV::Table** is a class enabling access to a CSV table as a hash of hashes or an array of arrays.
+**CSV::Table** is a class enabling access to a CSV table as a hash of hashes or an array of arrays. (**NOTE**: it does **not** allow duplicate field names.)
 
 It includes a very simple CSV file reader and parser. It is intended as a makeshift CSV file reader for use until other available modules can be made to test successfully with **Github workflows** as well as handle:
 
@@ -32,7 +32,9 @@ It includes a very simple CSV file reader and parser. It is intended as a makesh
 
   * normalizing field names
 
-As simple as it is, it does have some features that are very useful:
+This class **CAN** handle those successfully.
+
+As simple as it is, it also has some features that are very useful:
 
   * Comment lines are allowed
 
@@ -64,6 +66,8 @@ It cannot handle:
   * named line endings
 
   * multi-line fields
+
+  * duplicate field names
 
 Constructor signature
 ---------------------

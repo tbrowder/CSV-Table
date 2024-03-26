@@ -46,7 +46,7 @@ submethod TWEAK() {
                 # count currently known chars [,;|]
                 CHAR: for $header.comb -> $c {
                     # $c must be a currently know sepchar
-                    next unless $c ~~ /<[,;|]>/;
+                    next CHAR unless $c ~~ /<[,;|]>/;
                     if %c{$c}:exists {
                         %c{$c} += 1;
                     }
@@ -72,14 +72,27 @@ submethod TWEAK() {
     note "DEBUG: sepchar = $!separator" if $debug;
     # process the header and lines now that we know the separator
     my @arr = $header.split(/$schar/);
-    for @arr {
-        $_ = normalize-text $_;
-        @!fields-a.push: $_;
+    for @arr.kv -> $i, $v is copy {
+        $v = normalize-text $v;
+        @!fields-a.push: $v;
+
+        if %!fields-h{$v}:exists {
+            die "FATAL: Duplicate field names are illegal: $v";
+        }
+        else {
+            %!fields-h{$i} = $v;
+        }
     }
-    for @lines -> $line {
+
+    for @lines.kv -> $line-num, $line {
         @arr = $line.split(/$schar/);
-        for @arr {
-            $_ = normalize-text $_;
+        for @arr.kv -> $i, $v is copy {
+            @arr[$i] = normalize-text $v;
+
+            # how should %!lines-h be structured?
+            # field name is %!field-h{$i}
+            my $fnam = %!fields-h{$i};
+            %!lines-h{$i}{$fnam} = $v;
         }
         @!lines-a.push: @arr;
     }

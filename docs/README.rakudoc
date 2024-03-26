@@ -20,7 +20,7 @@ for $t.lines.kv -> $i, $line {
 =head1 DESCRIPTION
 
 B<CSV::Table> is a class enabling access to a CSV table as a hash of hashes
-or an array of arrays.
+or an array of arrays. (B<NOTE>: it does B<not> allow duplicate field names.)
 
 It includes a very simple CSV file reader and parser. It is intended
 as a makeshift CSV file reader for use until other available modules
@@ -31,7 +31,9 @@ handle:
 =item data lines with trailing whitespace.
 =item normalizing field names
 
-As simple as it is, it does have some features that are very useful:
+This class B<CAN> handle those successfully.
+
+As simple as it is, it also has some features that are very useful:
 
 =begin item
 Comment lines are allowed
@@ -41,6 +43,7 @@ lines which may have leading whitespace, but it and data at or after a
 comment character are ignored so the line is treated as a blank
 line. The comment character is user-definable but must not conflict
 with the chosen field separator.
+
 =end item
 
 =begin item
@@ -72,6 +75,7 @@ It cannot handle:
 =item quoted words
 =item named line endings
 =item multi-line fields
+=item duplicate field names
 
 =head2 Constructor signature
 
