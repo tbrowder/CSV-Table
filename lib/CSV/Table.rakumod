@@ -29,15 +29,15 @@ submethod TWEAK() {
     my $schar = $!separator;
 
     # get the raw lines while collecting some info
-    my $header;
+    my $header = 0;
     my @lines;
 
     LINE: for $!csv.IO.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         $line = strip-comment $line, :mark($cchar);
-        next if $line !~~ /\S/; # skip blank lines
+        next LINE if $line !~~ /\S/; # skip blank lines
 
-        if not $header.defined {
+        if not ($header and $header.defined) {
             $header = $line;
             if $!separator ~~ /:i auto/ {
                 note "DEBUG: separator = $!separator" if $debug;
@@ -66,9 +66,10 @@ submethod TWEAK() {
             next LINE;
         }
         @lines.push: $line;
+        next LINE;
     }
 
-    note "DEBUG: sepchar = $!separator" if $debug;
+    note "DEBUG: sepchar = $!separator" if 0 or $debug;
     # process the header and lines now that we know the separator
     my @arr = $header.split(/$schar/);
     for @arr.kv -> $i, $v is copy {
