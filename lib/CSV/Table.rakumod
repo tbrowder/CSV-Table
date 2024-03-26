@@ -1,7 +1,6 @@
 unit class CSV::Table;
 
 use Text::Utils :strip-comment, :normalize-text;
-use File::Temp;
 
 has $.csv is required;
 # options
