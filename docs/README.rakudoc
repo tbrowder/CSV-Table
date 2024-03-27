@@ -102,6 +102,18 @@ and tested for.
 =item2 C<#> [default]
 =item2 others, including multiple characters, are possible
 
+=head2 Accessing the table
+
+The following table shows how to access each cell in a table C<$t>
+with a header row plus C<R> rows and C<C> columns of data.
+
+=begin table
+$t.head[0] | ... | $t.head[C-1]
+$t.cell[0][0] | ... | $t.cell[0][C-1]
+...         | ... | ...
+$t.cell[R-1][0] | ... | $t.cell[R-1][C-1]
+=end table
+
 =head1 AUTHOR
 
 Tom Browder <tbrowder@acm.org>

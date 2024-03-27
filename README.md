@@ -98,6 +98,17 @@ Following are the allowable values for the named arguments. The user is cautione
 
     * others, including multiple characters, are possible
 
+Accessing the table
+-------------------
+
+The following table shows how to access each cell in a table `$t` with a header row plus `R` rows and `C` columns of data.
+
+<table class="pod-table">
+<tbody>
+<tr> <td>$t.head[0]</td> <td>...</td> <td>$t.head[C-1]</td> </tr> <tr> <td>$t.cell[0][0]</td> <td>...</td> <td>$t.cell[0][C-1]</td> </tr> <tr> <td>...</td> <td>...</td> <td>...</td> </tr> <tr> <td>$t.cell[R-1][0]</td> <td>...</td> <td>$t.cell[R-1][C-1]</td> </tr>
+</tbody>
+</table>
+
 AUTHOR
 ======
 
