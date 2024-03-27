@@ -106,13 +106,20 @@ and tested for.
 
 The following table shows how to access each cell in a table C<$t>
 with a header row plus C<R> rows and C<C> columns of data.
+(In matrix terminology it is an C<M x N> rectangular matrix with C<M> rows and C<N> columns.)
 
 =begin table
-$t.head[0] | ... | $t.head[C-1]
+$t.field[0] | ... | $t.field[C-1]
 $t.cell[0][0] | ... | $t.cell[0][C-1]
 ...         | ... | ...
 $t.cell[R-1][0] | ... | $t.cell[R-1][C-1]
 =end table
+
+The table's data cells can also be accessed by field name and row number:
+
+=begin code
+$t.col{$field-name}{$row-number}
+=end code
 
 =head1 AUTHOR
 

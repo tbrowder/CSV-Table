@@ -101,13 +101,17 @@ Following are the allowable values for the named arguments. The user is cautione
 Accessing the table
 -------------------
 
-The following table shows how to access each cell in a table `$t` with a header row plus `R` rows and `C` columns of data.
+The following table shows how to access each cell in a table `$t` with a header row plus `R` rows and `C` columns of data. (In matrix terminology it is an `M x N` rectangular matrix with `M` rows and `N` columns.)
 
 <table class="pod-table">
 <tbody>
-<tr> <td>$t.head[0]</td> <td>...</td> <td>$t.head[C-1]</td> </tr> <tr> <td>$t.cell[0][0]</td> <td>...</td> <td>$t.cell[0][C-1]</td> </tr> <tr> <td>...</td> <td>...</td> <td>...</td> </tr> <tr> <td>$t.cell[R-1][0]</td> <td>...</td> <td>$t.cell[R-1][C-1]</td> </tr>
+<tr> <td>$t.field[0]</td> <td>...</td> <td>$t.field[C-1]</td> </tr> <tr> <td>$t.cell[0][0]</td> <td>...</td> <td>$t.cell[0][C-1]</td> </tr> <tr> <td>...</td> <td>...</td> <td>...</td> </tr> <tr> <td>$t.cell[R-1][0]</td> <td>...</td> <td>$t.cell[R-1][C-1]</td> </tr>
 </tbody>
 </table>
+
+The table's data cells can also be accessed by field name and row number:
+
+    $t.col{$field-name}{$row-number}
 
 AUTHOR
 ======
