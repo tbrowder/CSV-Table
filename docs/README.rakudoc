@@ -9,12 +9,8 @@ B<CSV::Table> - Provides routines for manipulating a CSV file with a header row
 =begin code :lang<raku>
 use CSV::Table;
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.fields.elems;
-say $t.lines.elems;
-for $t.lines.kv -> $i, $line {
-    for  $line.fields.kv -> $j, $v {
-    };
-}
+say $t.field.elems;
+say $t.row.elems;
 =end code
 
 =head1 DESCRIPTION
@@ -59,7 +55,7 @@ turned off if desired (C<normalize=False>).
 Automatic determination of separator character
 
 The header line is searched for the most-used separator character from
-this list: C<|>, C<;>, C<,>.  Other non-space characters may be used
+this list: C<|>, C<;>, and C<,>.  Other non-space characters may be used
 but are probably not tested. File an issue if you want to use a
 separator not currently specified.
 =end item
@@ -80,7 +76,7 @@ It cannot handle:
 =head2 Constructor signature
 
 =begin code
-CSV::Table.new: :$csv, :separator='auto', :normalize=True, :comment-char='#'
+CSV::Table.new: :$csv, :separator='auto', :trim=True, :normalize=True, :comment-char='#'
 =end code
 
 Following are the allowable values for the named arguments. The user

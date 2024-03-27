@@ -11,12 +11,8 @@ SYNOPSIS
 ```raku
 use CSV::Table;
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.fields.elems;
-say $t.lines.elems;
-for $t.lines.kv -> $i, $line {
-    for  $line.fields.kv -> $j, $v {
-    };
-}
+say $t.field.elems;
+say $t.row.elems;
 ```
 
 DESCRIPTION
@@ -46,7 +42,7 @@ As simple as it is, it also has some features that are very useful:
 
   * Automatic determination of separator character
 
-    The header line is searched for the most-used separator character from this list: `|`, `;`, `,`. Other non-space characters may be used but are probably not tested. File an issue if you want to use a separator not currently specified.
+    The header line is searched for the most-used separator character from this list: `|`, `;`, and `,`. Other non-space characters may be used but are probably not tested. File an issue if you want to use a separator not currently specified.
 
 Limitations
 -----------
@@ -72,7 +68,7 @@ It cannot handle:
 Constructor signature
 ---------------------
 
-    CSV::Table.new: :$csv, :separator='auto', :normalize=True, :comment-char='#'
+    CSV::Table.new: :$csv, :separator='auto', :trim=True, :normalize=True, :comment-char='#'
 
 Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified, and it can be added and tested for.
 

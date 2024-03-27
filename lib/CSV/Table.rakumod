@@ -72,6 +72,12 @@ submethod TWEAK() {
     note "DEBUG: sepchar = $!separator" if 0 or $debug;
     # process the header and lines now that we know the separator
     my @arr = $header.split(/$schar/);
+    my $nfields = @arr.elems; 
+    # $nfields number controls the rest of the data handling.
+    # it is a fatal error if a line has more columns. lines
+    # with fewer columns are filled with empty cells.
+                      
+    # for now we always normalize headers
     for @arr.kv -> $i, $v is copy {
         $v = normalize-text $v;
         @!field.push: $v;
@@ -88,8 +94,12 @@ submethod TWEAK() {
 
     for @lines.kv -> $line-num, $line {
         @arr = $line.split(/$schar/);
+        my $ne = @arr.elems;
+
         for @arr.kv -> $i, $v is copy {
-            @arr[$i] = normalize-text $v;
+            if $!normalize {
+                @arr[$i] = normalize-text $v;
+            }
 
             # how should %!cell be structured?
             # field name is %!colname{$i}
