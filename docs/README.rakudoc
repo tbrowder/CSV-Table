@@ -80,7 +80,7 @@ It cannot handle:
 =head2 Constructor signature
 
 =begin code
-CSV::Table.new: :$csv, :separator='auto', :normalize=True, :comment-char='#')
+CSV::Table.new: :$csv, :separator='auto', :normalize=True, :comment-char='#'
 =end code
 
 Following are the allowable values for the named arguments. The user
