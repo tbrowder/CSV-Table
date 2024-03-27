@@ -13,12 +13,13 @@ has $.comment-char = '#';
 
 # data
 # arrays
-has @.fields-a;
-has @.lines-a;
+has @.field; # array of field names
+has @.cell;  # array of arrays of row cells
 
 # hashes
-has %.fields-h;
-has %.lines-h;
+has %.col;     # field name => @rows
+has %.colnum;  # field name => col number
+has %.colname; # col number => field name
 
 submethod TWEAK() {
     my $debug = 0;
@@ -73,13 +74,15 @@ submethod TWEAK() {
     my @arr = $header.split(/$schar/);
     for @arr.kv -> $i, $v is copy {
         $v = normalize-text $v;
-        @!fields-a.push: $v;
+        @!field.push: $v;
 
-        if %!fields-h{$v}:exists {
+        if %!col{$v}:exists {
             die "FATAL: Duplicate field names are illegal: $v";
         }
         else {
-            %!fields-h{$i} = $v;
+            %!col{$v}     = [];
+            %!colnum{$v}  = $i;
+            %!colname{$i} = $v;
         }
     }
 
@@ -88,11 +91,12 @@ submethod TWEAK() {
         for @arr.kv -> $i, $v is copy {
             @arr[$i] = normalize-text $v;
 
-            # how should %!lines-h be structured?
-            # field name is %!field-h{$i}
-            my $fnam = %!fields-h{$i};
-            %!lines-h{$i}{$fnam} = $v;
+            # how should %!cell be structured?
+            # field name is %!colname{$i}
+            my $fnam = %!colname{$i};
+            #:%!col{$i}{$fnam} = $v;
+            # TODO push the col vals to the correct $!col
         }
-        @!lines-a.push: @arr;
+        @!cell.push: @arr;
     }
 }
