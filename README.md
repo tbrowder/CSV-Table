@@ -29,7 +29,7 @@ Quote characters must be balanced, and quoted text may be normalzed if the user 
 <th>Left quote</th> <th>Right quote</th>
 </tr></thead>
 <tbody>
-<tr> <td>U+0022 (B&lt;&#x0022;&gt;)</td> <td>U+0022 9</td> </tr> <tr> <td>U+0027 9</td> <td>U+0027 9</td> </tr> <tr> <td>U+0018 9</td> <td>U+0019 9</td> </tr> <tr> <td>U+201C 9</td> <td>U+201D 9</td> </tr>
+<tr> <td>U+0022 (&#x0022;)</td> <td>U+0022 9</td> </tr> <tr> <td>U+0027 9</td> <td>U+0027 9</td> </tr> <tr> <td>U+0018 9</td> <td>U+0019 9</td> </tr> <tr> <td>U+201C 9</td> <td>U+201D 9</td> </tr>
 </tbody>
 </table>
 
