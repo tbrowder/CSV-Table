@@ -3,7 +3,7 @@
 NAME
 ====
 
-**CSV::Table** - Provides routines for manipulating a CSV file with a header row
+**CSV::Table** - Provides routines for querying a CSV file with a header row
 
 SYNOPSIS
 ========
@@ -11,14 +11,29 @@ SYNOPSIS
 ```raku
 use CSV::Table;
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.field.elems;
-say $t.row.elems;
+say $t.num-fields;
+say $t.num-data-row;
 ```
 
 DESCRIPTION
 ===========
 
-**CSV::Table** is a class enabling access to a CSV table as a hash of hashes or an array of arrays. (**NOTE**: it does **not** allow duplicate field names.)
+**CSV::Table** is a class enabling access to a CSV table's contents. Currently it handles only tables with a header row with unique field names. 
+
+By default, the contents of all unquoted text is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single ones.
+
+Quote characters must be balanced, and quoted text may be normalzed if the user so desires. The following table shows the recognized quote pairs.
+
+<table class="pod-table">
+<thead><tr>
+<th>Left quote</th> <th>Right quote</th>
+</tr></thead>
+<tbody>
+<tr> <td>U+0022 QUOTATION MARK</td> <td>U+0022 QUOTATION MARK</td> </tr> <tr> <td>U+0027 APOSTROPHE</td> <td>U+0027 APOSTROPHE</td> </tr> <tr> <td>U+0018 LEFT SINGLE QUOTATION MARK</td> <td>U+0019 RIGHT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+201C LEFT DOUBLE QUOTATION MARK</td> <td>U+201D RIGHT DOUBLE QUOTATION MARK</td> </tr>
+</tbody>
+</table>
+
+NOTE: Newlines are **not** currently handled. 
 
 It includes a very simple CSV file reader and parser. It is intended as a makeshift CSV file reader for use until other available modules can be made to test successfully with **Github workflows** as well as handle:
 

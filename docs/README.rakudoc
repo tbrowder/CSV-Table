@@ -2,21 +2,42 @@
 
 =head1 NAME
 
-B<CSV::Table> - Provides routines for manipulating a CSV file with a header row
+B<CSV::Table> - Provides routines for querying a CSV file with a header row
 
 =head1 SYNOPSIS
 
 =begin code :lang<raku>
 use CSV::Table;
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.field.elems;
-say $t.row.elems;
+say $t.num-fields;
+say $t.num-data-row;
 =end code
 
 =head1 DESCRIPTION
 
-B<CSV::Table> is a class enabling access to a CSV table as a hash of hashes
-or an array of arrays. (B<NOTE>: it does B<not> allow duplicate field names.)
+B<CSV::Table> is a class enabling access to a CSV table's
+contents. Currently it handles only tables with a header
+row with unique field names. 
+
+By default, the contents of
+all unquoted text is 'normalized', that is, it is trimmed
+of leading and trailing whitespace and multiple contiguous
+interior whitespaces are collapsed into single ones.
+
+Quote characters must be balanced, and quoted text may be normalzed
+if the user so desires. The following table shows the recognized
+quote pairs.
+
+=begin table
+Left quote              | Right quote
+------------------------+------------------------
+U+0022  QUOTATION MARK | U+0022  QUOTATION MARK
+U+0027  APOSTROPHE     | U+0027  APOSTROPHE   
+U+0018  LEFT SINGLE QUOTATION MARK | U+0019  RIGHT SINGLE QUOTATION MARK  
+U+201C  LEFT DOUBLE QUOTATION MARK | U+201D  RIGHT DOUBLE QUOTATION MARK  
+=end table
+
+NOTE: Newlines are B<not> currently handled. 
 
 It includes a very simple CSV file reader and parser. It is intended
 as a makeshift CSV file reader for use until other available modules

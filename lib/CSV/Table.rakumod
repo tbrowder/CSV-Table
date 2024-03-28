@@ -110,3 +110,17 @@ submethod TWEAK() {
         @!cell.push: @arr;
     }
 }
+
+=begin comment
+method save(:$force) {
+    # the file is at $!csv
+    my $res = prompt "Save file '$!csv'? (Y/n) ";
+    if $res ~~ /:i y/ {
+        say "File '$!csv' was saved.";
+    }
+    else {
+        say "File '$!csv' was not overwritten.";
+    }
+}
+=end comment
+
