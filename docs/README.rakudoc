@@ -29,12 +29,23 @@ if the user so desires. The following table shows the recognized
 quote pairs.
 
 =begin table
-Left quote              | Right quote
-------------------------+------------------------
-U+0022  QUOTATION MARK | U+0022  QUOTATION MARK
-U+0027  APOSTROPHE     | U+0027  APOSTROPHE   
-U+0018  LEFT SINGLE QUOTATION MARK | U+0019  RIGHT SINGLE QUOTATION MARK  
-U+201C  LEFT DOUBLE QUOTATION MARK | U+201D  RIGHT DOUBLE QUOTATION MARK  
+Left quote | Right quote
+-----------+------------
+U+0022  \x0022  | U+0022  9
+U+0027  9  | U+0027  9
+U+0018  9  | U+0019  9
+U+201C  9  | U+201D  9
+=end table
+
+=begin table
+Unicode hex code | Unicode name
+-----------------+-------------
+U+0022 | QUOTATION MARK 
+U+0027 | APOSTROPHE   
+U+0018 | LEFT SINGLE QUOTATION MARK 
+U+0019 | RIGHT SINGLE QUOTATION MARK  
+U+201C | LEFT DOUBLE QUOTATION MARK 
+U+201D | RIGHT DOUBLE QUOTATION MARK  
 =end table
 
 NOTE: Newlines are B<not> currently handled. 
@@ -83,15 +94,14 @@ separator not currently specified.
 
 =head2 Limitations
 
-It cannot handle:
+It cannot currently handle:
 
 =item files without a header line (results are untested)
 =item special characters
 =item backslashes
 =item non-text data
-=item quoted words
 =item named line endings
-=item multi-line fields
+=item multi-line fields (i.e., embedded newlines)
 =item duplicate field names
 
 =head2 Constructor signature

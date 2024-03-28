@@ -29,7 +29,16 @@ Quote characters must be balanced, and quoted text may be normalzed if the user 
 <th>Left quote</th> <th>Right quote</th>
 </tr></thead>
 <tbody>
-<tr> <td>U+0022 QUOTATION MARK</td> <td>U+0022 QUOTATION MARK</td> </tr> <tr> <td>U+0027 APOSTROPHE</td> <td>U+0027 APOSTROPHE</td> </tr> <tr> <td>U+0018 LEFT SINGLE QUOTATION MARK</td> <td>U+0019 RIGHT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+201C LEFT DOUBLE QUOTATION MARK</td> <td>U+201D RIGHT DOUBLE QUOTATION MARK</td> </tr>
+<tr> <td>U+0022 \x0022</td> <td>U+0022 9</td> </tr> <tr> <td>U+0027 9</td> <td>U+0027 9</td> </tr> <tr> <td>U+0018 9</td> <td>U+0019 9</td> </tr> <tr> <td>U+201C 9</td> <td>U+201D 9</td> </tr>
+</tbody>
+</table>
+
+<table class="pod-table">
+<thead><tr>
+<th>Unicode hex code</th> <th>Unicode name</th>
+</tr></thead>
+<tbody>
+<tr> <td>U+0022</td> <td>QUOTATION MARK</td> </tr> <tr> <td>U+0027</td> <td>APOSTROPHE</td> </tr> <tr> <td>U+0018</td> <td>LEFT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+0019</td> <td>RIGHT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+201C</td> <td>LEFT DOUBLE QUOTATION MARK</td> </tr> <tr> <td>U+201D</td> <td>RIGHT DOUBLE QUOTATION MARK</td> </tr>
 </tbody>
 </table>
 
@@ -62,7 +71,7 @@ As simple as it is, it also has some features that are very useful:
 Limitations
 -----------
 
-It cannot handle:
+It cannot currently handle:
 
   * files without a header line (results are untested)
 
@@ -72,11 +81,9 @@ It cannot handle:
 
   * non-text data
 
-  * quoted words
-
   * named line endings
 
-  * multi-line fields
+  * multi-line fields (i.e., embedded newlines)
 
   * duplicate field names
 
