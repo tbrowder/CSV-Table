@@ -31,7 +31,7 @@ quote pairs.
 =begin table
 Left quote | Right quote
 -----------+------------
-U+0022  \x0022  | U+0022  9
+U+0022  E<0x0022>  | U+0022  9
 U+0027  9  | U+0027  9
 U+0018  9  | U+0019  9
 U+201C  9  | U+201D  9
