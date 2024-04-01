@@ -3,17 +3,17 @@ unit class CSV::Table;
 use Text::Utils :strip-comment, :normalize-text;
 
 has $.csv is required;
+
 # options
-#   separator
 has $.separator    = 'auto'; # auto, comma, pipe, semicolon
-#   normalize
 has $.normalize    = True;
-#   comment-char
 has $.comment-char = '#';
+has $.has-header   = True;
+has $.line-ending  = '\n';
 
 # data
 # arrays
-has @.field; # array of field names
+has @.field; # array of field names (or 0..N-1 if no header)
 has @.cell;  # array of arrays of row cells
 
 # hashes
@@ -30,7 +30,7 @@ submethod TWEAK() {
     my $schar = $!separator;
 
     # get the raw lines while collecting some info
-    my $header;
+    my $header; # if applicable
     my @lines;
 
     LINE: for $!csv.IO.lines -> $line is copy {
@@ -41,7 +41,12 @@ submethod TWEAK() {
     }
 
     # determine the separator
-    $header = @lines.shift;
+    if $!has-header {
+        $header = @lines.shift;
+    }
+    else {
+        $header = @lines.head;
+    }
 
     if $!separator ~~ /:i auto / {
         note "DEBUG: separator = $!separator" if $debug;
@@ -77,7 +82,7 @@ submethod TWEAK() {
     # it is a fatal error if a line has more columns. lines
     # with fewer columns are filled with empty cells.
                       
-    # for now we always normalize headers
+    # we always trim headers
     for @arr.kv -> $i, $v is copy {
         $v = normalize-text $v;
         @!field.push: $v;
@@ -111,16 +116,24 @@ submethod TWEAK() {
     }
 }
 
-=begin comment
-method save(:$force) {
-    # the file is at $!csv
-    my $res = prompt "Save file '$!csv'? (Y/n) ";
-    if $res ~~ /:i y/ {
-        say "File '$!csv' was saved.";
+method save {
+    # the input file is $!csv; save its contents
+    # without comments as "{$!csv.basename}-raw.csv"
+    my $raw-csv = "{$!csv.basename}-raw.csv";
+    my $res;
+    if $raw-csv.IO.e {
+        say "File '$raw-csv' exists.";
+        $res = prompt "Overwrite file '$raw-csv'? (Y/n) ";
+        if $res ~~ /:i y/ {
+            say "Overwriting file '$raw-csv'...";
+        }
+        else {
+            say "File '$!csv' was not overwritten.";
+        }
     }
     else {
+        say "Saving file '$raw-csv'...";
         say "File '$!csv' was not overwritten.";
     }
 }
-=end comment
 

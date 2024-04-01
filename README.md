@@ -29,7 +29,7 @@ Quote characters must be balanced, and quoted text may be normalzed if the user 
 <th>Left quote</th> <th>Right quote</th>
 </tr></thead>
 <tbody>
-<tr> <td>U+0022 (&#x0022;)</td> <td>U+0022 9</td> </tr> <tr> <td>U+0027 9</td> <td>U+0027 9</td> </tr> <tr> <td>U+0018 9</td> <td>U+0019 9</td> </tr> <tr> <td>U+201C 9</td> <td>U+201D 9</td> </tr>
+<tr> <td>U+0022 (&#x0022;)</td> <td>U+0022 (&#x0022;)</td> </tr> <tr> <td>U+0027 (&#x0027;)</td> <td>U+0027 (&#x0027;)</td> </tr> <tr> <td>U+2018 (&#x2018;)</td> <td>U+2019 (&#x2019;)</td> </tr> <tr> <td>U+201C (&#x201C;)</td> <td>U+201D (&#x201D;)</td> </tr>
 </tbody>
 </table>
 
@@ -38,7 +38,7 @@ Quote characters must be balanced, and quoted text may be normalzed if the user 
 <th>Unicode hex code</th> <th>Unicode name</th>
 </tr></thead>
 <tbody>
-<tr> <td>U+0022</td> <td>QUOTATION MARK</td> </tr> <tr> <td>U+0027</td> <td>APOSTROPHE</td> </tr> <tr> <td>U+0018</td> <td>LEFT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+0019</td> <td>RIGHT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+201C</td> <td>LEFT DOUBLE QUOTATION MARK</td> </tr> <tr> <td>U+201D</td> <td>RIGHT DOUBLE QUOTATION MARK</td> </tr>
+<tr> <td>U+0022</td> <td>QUOTATION MARK</td> </tr> <tr> <td>U+0027</td> <td>APOSTROPHE</td> </tr> <tr> <td>U+2018</td> <td>LEFT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+2019</td> <td>RIGHT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+201C</td> <td>LEFT DOUBLE QUOTATION MARK</td> </tr> <tr> <td>U+201D</td> <td>RIGHT DOUBLE QUOTATION MARK</td> </tr>
 </tbody>
 </table>
 

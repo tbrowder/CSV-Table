@@ -31,10 +31,10 @@ quote pairs.
 =begin table
 Left quote | Right quote
 -----------+------------
-U+0022  (E<0x0022>)  | U+0022  9
-U+0027  9  | U+0027  9
-U+0018  9  | U+0019  9
-U+201C  9  | U+201D  9
+U+0022  (E<0x0022>)  | U+0022  (E<0x0022>)
+U+0027  (E<0x0027>)  | U+0027  (E<0x0027>)
+U+2018  (E<0x2018>)  | U+2019  (E<0x2019>)
+U+201C  (E<0x201C>)  | U+201D  (E<0x201D>)
 =end table
 
 =begin table
@@ -42,8 +42,8 @@ Unicode hex code | Unicode name
 -----------------+-------------
 U+0022 | QUOTATION MARK 
 U+0027 | APOSTROPHE   
-U+0018 | LEFT SINGLE QUOTATION MARK 
-U+0019 | RIGHT SINGLE QUOTATION MARK  
+U+2018 | LEFT SINGLE QUOTATION MARK 
+U+2019 | RIGHT SINGLE QUOTATION MARK  
 U+201C | LEFT DOUBLE QUOTATION MARK 
 U+201D | RIGHT DOUBLE QUOTATION MARK  
 =end table
