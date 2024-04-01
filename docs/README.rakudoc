@@ -88,12 +88,17 @@ It cannot currently handle:
 =item binary data
 =item duplicate field names in a header line
 
-=head2 Constructor signature
+=head2 Constructor with default options
 
 =begin code
-CSV::Table.new: :$csv, :separator='auto', :normalize=True, 
-                :comment-char='#', :has-header=True,
-                :line-ending="\n"
+my $t = CSV::Table.new: :$csv, 
+                        :has-header=True,
+                        :separator='auto', 
+                        :normalize=True, 
+                        :trim=True, 
+                        :comment-char='#', 
+                        :line-ending="\n"
+                        ;
 =end code
 
 Following are the allowable values for the named arguments. The user
@@ -108,6 +113,10 @@ and tested for.
 =item2 semicolon (C<;>)
 
 =item C<:$normalize>
+=item2 C<True> [default]
+=item2 C<False>
+
+=item C<:$trim>
 =item2 C<True> [default]
 =item2 C<False>
 
