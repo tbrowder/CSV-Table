@@ -3,7 +3,7 @@
 NAME
 ====
 
-**CSV::Table** - Provides routines for querying a CSV file with a header row
+**CSV::Table** - Provides routines for querying a CSV file with or without a header row
 
 SYNOPSIS
 ========
@@ -11,86 +11,74 @@ SYNOPSIS
 ```raku
 use CSV::Table;
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.num-fields;
-say $t.num-data-row;
+say $t.field.elems;  # OUTPUT: 4 # zero if no header row
+say $t.row.elems;    # OUTPUT: 6 # not counting any header row
 ```
 
 DESCRIPTION
 ===========
 
-**CSV::Table** is a class enabling access to a CSV table's contents. Currently it handles only tables with a header row with unique field names. 
+**CSV::Table** is a class enabling access to a CSV table's contents. Tables with a header row must have unique field names. 
 
-By default, the contents of all unquoted text is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single ones.
+By default, text is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single ones.
 
-Quote characters must be balanced, and quoted text may be normalzed if the user so desires. The following table shows the recognized quote pairs.
+Input files are read immediately, so very large files may overwhelm system resources. 
 
-<table class="pod-table">
-<thead><tr>
-<th>Left quote</th> <th>Right quote</th>
-</tr></thead>
-<tbody>
-<tr> <td>U+0022 (&#x0022;)</td> <td>U+0022 (&#x0022;)</td> </tr> <tr> <td>U+0027 (&#x0027;)</td> <td>U+0027 (&#x0027;)</td> </tr> <tr> <td>U+2018 (&#x2018;)</td> <td>U+2019 (&#x2019;)</td> </tr> <tr> <td>U+201C (&#x201C;)</td> <td>U+201D (&#x201D;)</td> </tr>
-</tbody>
-</table>
+It can handle the following which other CSV readers may not:
 
-<table class="pod-table">
-<thead><tr>
-<th>Unicode hex code</th> <th>Unicode name</th>
-</tr></thead>
-<tbody>
-<tr> <td>U+0022</td> <td>QUOTATION MARK</td> </tr> <tr> <td>U+0027</td> <td>APOSTROPHE</td> </tr> <tr> <td>U+2018</td> <td>LEFT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+2019</td> <td>RIGHT SINGLE QUOTATION MARK</td> </tr> <tr> <td>U+201C</td> <td>LEFT DOUBLE QUOTATION MARK</td> </tr> <tr> <td>U+201D</td> <td>RIGHT DOUBLE QUOTATION MARK</td> </tr>
-</tbody>
-</table>
+  * with a header line
 
-NOTE: Newlines are **not** currently handled. 
+    * normalizing field names
 
-It includes a very simple CSV file reader and parser. It is intended as a makeshift CSV file reader for use until other available modules can be made to test successfully with **Github workflows** as well as handle:
+    * header lines with an ending empty field (reported but otherwise ignored)
 
-  * header lines with an ending empty field
+    * data lines with fewer fields than a header (missing values assumed to be "")
 
-  * data lines with trailing whitespace.
+    * data lines with more fields than its header (fatal, but reported)
 
-  * normalizing field names
+  * without a header line
 
-This class **CAN** handle those successfully.
+    * data lines are padded with empty fields to the maximum number of fields found in the file
 
-As simple as it is, it also has some features that are very useful:
+  * either with or without a header line
+
+    * lines with trailing whitespace
+
+As simple as it is, it also has some uncommon features that are very useful:
 
   * Comment lines are allowed
 
-    This feature, which is not usual in CSV parsers, is to ignore comment lines which may have leading whitespace, but it and data at or after a comment character are ignored so the line is treated as a blank line. The comment character is user-definable but must not conflict with the chosen field separator.
+    This feature, which is not usual in CSV parsers, is to ignore comment lines (which may have leading whitespace), but it and data at or after a comment character are ignored so the line is treated as a blank line. The comment character is user-definable but must not conflict with the chosen field separator.
+
+    There is a `save` method which enables saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
 
   * Text normalization
 
-    Its results are to normalize text in a field, that is: leading and trailing whitespace is trimmed and interior whitespace is collapsed to one space between words. This is the default behavior but can be turned off if desired (`normalize=False`).
+    Its results are to normalize text in a field, that is: leading and trailing whitespace is trimmed and interior whitespace is collapsed to one space between words. This is the default behavior but can be turned off if desired (`normalize=False`). In that event, data in all fields are still trimmed of leading and trailing whitespace (unless `trim=False`).
 
   * Automatic determination of separator character
 
-    The header line is searched for the most-used separator character from this list: `|`, `;`, and `,`. Other non-space characters may be used but are probably not tested. File an issue if you want to use a separator not currently specified.
+    Unless the field separator is selected otherwise, the first line is searched for the most-used separator character from this list: `|`, `;`, and `,`. Other non-space characters may be used but are probably not tested. File an issue if you want to add a separator not currently specified.
 
 Limitations
 -----------
 
 It cannot currently handle:
 
-  * files without a header line (results are untested)
-
   * special characters
 
   * backslashes
 
-  * non-text data
+  * binary data
 
-  * named line endings
-
-  * multi-line fields (i.e., embedded newlines)
-
-  * duplicate field names
+  * duplicate field names in a header line
 
 Constructor signature
 ---------------------
 
-    CSV::Table.new: :$csv, :separator='auto', :trim=True, :normalize=True, :comment-char='#'
+    CSV::Table.new: :$csv, :separator='auto', :normalize=True, 
+                    :comment-char='#', :has-header=True,
+                    :line-ending="\n"
 
 Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified, and it can be added and tested for.
 
@@ -115,6 +103,18 @@ Following are the allowable values for the named arguments. The user is cautione
     * `#` [default]
 
     * others, including multiple characters, are possible
+
+  * `:$has-header`
+
+    * `True` [default]
+
+    * `False`
+
+  * `:$line-ending`
+
+    * `"\n"` [default]
+
+    * `String`
 
 Accessing the table
 -------------------

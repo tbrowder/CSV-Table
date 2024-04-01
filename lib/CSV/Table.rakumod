@@ -9,7 +9,7 @@ has $.separator    = 'auto'; # auto, comma, pipe, semicolon
 has $.normalize    = True;
 has $.comment-char = '#';
 has $.has-header   = True;
-has $.line-ending  = '\n';
+has $.line-ending  = "\n";
 
 # data
 # arrays

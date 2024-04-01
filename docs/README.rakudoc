@@ -2,76 +2,60 @@
 
 =head1 NAME
 
-B<CSV::Table> - Provides routines for querying a CSV file with a header row
+B<CSV::Table> - Provides routines for querying a CSV file with or without a header row
 
 =head1 SYNOPSIS
 
 =begin code :lang<raku>
 use CSV::Table;
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.num-fields;
-say $t.num-data-row;
+say $t.field.elems;  # OUTPUT: 4 # zero if no header row
+say $t.row.elems;    # OUTPUT: 6 # not counting any header row
 =end code
 
 =head1 DESCRIPTION
 
 B<CSV::Table> is a class enabling access to a CSV table's
-contents. Currently it handles only tables with a header
-row with unique field names. 
+contents. Tables with a header
+row must have unique field names. 
 
-By default, the contents of
-all unquoted text is 'normalized', that is, it is trimmed
+By default,
+text is 'normalized', that is, it is trimmed
 of leading and trailing whitespace and multiple contiguous
 interior whitespaces are collapsed into single ones.
 
-Quote characters must be balanced, and quoted text may be normalzed
-if the user so desires. The following table shows the recognized
-quote pairs.
+Input files are read immediately, so very large files may
+overwhelm system resources. 
 
-=begin table
-Left quote | Right quote
------------+------------
-U+0022  (E<0x0022>)  | U+0022  (E<0x0022>)
-U+0027  (E<0x0027>)  | U+0027  (E<0x0027>)
-U+2018  (E<0x2018>)  | U+2019  (E<0x2019>)
-U+201C  (E<0x201C>)  | U+201D  (E<0x201D>)
-=end table
+It can handle the following which other CSV readers may not:
 
-=begin table
-Unicode hex code | Unicode name
------------------+-------------
-U+0022 | QUOTATION MARK 
-U+0027 | APOSTROPHE   
-U+2018 | LEFT SINGLE QUOTATION MARK 
-U+2019 | RIGHT SINGLE QUOTATION MARK  
-U+201C | LEFT DOUBLE QUOTATION MARK 
-U+201D | RIGHT DOUBLE QUOTATION MARK  
-=end table
+=item with a header line
+=item2 normalizing field names
+=item2 header lines with an ending empty field (reported but otherwise ignored)
+=item2 data lines with fewer fields than a header (missing values assumed to be "")
+=item2 data lines with more fields than its header (fatal, but reported)
 
-NOTE: Newlines are B<not> currently handled. 
+=item without a header line
+=item2 data lines are padded with empty fields to the maximum number of fields
+found in the file
 
-It includes a very simple CSV file reader and parser. It is intended
-as a makeshift CSV file reader for use until other available modules
-can be made to test successfully with B<Github workflows> as well as
-handle:
+=item either with or without a header line
+=item2 lines with trailing whitespace
 
-=item header lines with an ending empty field
-=item data lines with trailing whitespace.
-=item normalizing field names
-
-This class B<CAN> handle those successfully.
-
-As simple as it is, it also has some features that are very useful:
+As simple as it is, it also has some uncommon features that are very useful:
 
 =begin item
 Comment lines are allowed
 
 This feature, which is not usual in CSV parsers, is to ignore comment
-lines which may have leading whitespace, but it and data at or after a
+lines (which may have leading whitespace), but it and data at or after a
 comment character are ignored so the line is treated as a blank
 line. The comment character is user-definable but must not conflict
 with the chosen field separator.
 
+There is a C<save> method which enables saving a "raw" CSV file
+without the comments so the file can be used with conventional CSV
+handlers such as LibreOffice or Excel.
 =end item
 
 =begin item
@@ -81,14 +65,17 @@ Its results are to normalize text in a field, that is: leading and
 trailing whitespace is trimmed and interior whitespace is collapsed to
 one space between words.  This is the default behavior but can be
 turned off if desired (C<normalize=False>).
+In that event, data in all fields are still trimmed of leading and trailing
+whitespace (unless C<trim=False>).
 =end item
 
 =begin item
 Automatic determination of separator character
 
-The header line is searched for the most-used separator character from
+Unless the field separator is selected otherwise, the first line is 
+searched for the most-used separator character from
 this list: C<|>, C<;>, and C<,>.  Other non-space characters may be used
-but are probably not tested. File an issue if you want to use a
+but are probably not tested. File an issue if you want to add a
 separator not currently specified.
 =end item
 
@@ -96,18 +83,17 @@ separator not currently specified.
 
 It cannot currently handle:
 
-=item files without a header line (results are untested)
 =item special characters
 =item backslashes
-=item non-text data
-=item named line endings
-=item multi-line fields (i.e., embedded newlines)
-=item duplicate field names
+=item binary data
+=item duplicate field names in a header line
 
 =head2 Constructor signature
 
 =begin code
-CSV::Table.new: :$csv, :separator='auto', :trim=True, :normalize=True, :comment-char='#'
+CSV::Table.new: :$csv, :separator='auto', :normalize=True, 
+                :comment-char='#', :has-header=True,
+                :line-ending="\n"
 =end code
 
 Following are the allowable values for the named arguments. The user
@@ -128,6 +114,14 @@ and tested for.
 =item C<:$comment-char>
 =item2 C<#> [default]
 =item2 others, including multiple characters, are possible
+
+=item C<:$has-header>
+=item2 C<True> [default]
+=item2 C<False>
+
+=item C<:$line-ending>
+=item2 C<"\n"> [default]
+=item2 C<String>
 
 =head2 Accessing the table
 
