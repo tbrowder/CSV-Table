@@ -8,7 +8,7 @@ name, age; height; weight
 Sally  Jean,21; 52; 103
 =end comment
 
-is $csv.IO.r, True;
+is $csv.IO.r, True, "file '$csv' is readable";
 
 my $t = CSV::Table.new: :$csv;
 
