@@ -10,9 +10,15 @@ SYNOPSIS
 
 ```raku
 use CSV::Table;
+# Using a 6x4 row/column matrix for data plus a header row
+# with indexing from zero
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.field.elems;  # OUTPUT: 4 # zero if no header row
-say $t.row.elems;    # OUTPUT: 6 # not counting any header row
+say $t.fields;       # OUTPUT: 4 # zero if no header row
+say $t.rows;         # OUTPUT: 6 # not counting any header row
+say $t.cols;         # OUTPUT: 4
+say $t.field[0]      # OUTPUT: name # Any if no header row
+say $t.cell[0][0]    # OUTPUT: John
+say $t.cell[1][0]    # OUTPUT: Sally
 ```
 
 DESCRIPTION
@@ -58,7 +64,7 @@ As simple as it is, it also has some uncommon features that are very useful:
 
   * Automatic determination of separator character
 
-    Unless the field separator is selected otherwise, the first line is searched for the most-used separator character from this list: `|`, `;`, and `,`. Other non-space characters may be used but are probably not tested. File an issue if you want to add a separator not currently specified.
+    Unless the field separator is selected otherwise, the first line is searched for the most-used separator character from this list: `|`, `;`, `,` and `\t`. Other non-space characters may be used but are probably not tested. File an issue if you want to add a separator not currently specified.
 
 Limitations
 -----------
@@ -73,14 +79,19 @@ It cannot currently handle:
 
   * duplicate field names in a header line
 
-Constructor signature
----------------------
+Constructor with default options
+--------------------------------
 
-    CSV::Table.new: :$csv, :separator='auto', :normalize=True, 
-                    :comment-char='#', :has-header=True,
-                    :line-ending="\n"
+    my $t = CSV::Table.new: :$csv, 
+                            :has-header=True,
+                            :separator='auto', 
+                            :normalize=True, 
+                            :trim=True, 
+                            :comment-char='#', 
+                            :line-ending="\n"
+                            ;
 
-Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified, and it can be added and tested for.
+Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified and it can be added and tested for.
 
   * `:$separator`
 
@@ -92,7 +103,15 @@ Following are the allowable values for the named arguments. The user is cautione
 
     * semicolon (`;`)
 
+    * tab (`\t`)
+
   * `:$normalize`
+
+    * `True` [default]
+
+    * `False`
+
+  * `:$trim`
 
     * `True` [default]
 

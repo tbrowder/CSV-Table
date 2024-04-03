@@ -1,2 +1,9 @@
 + consider adding custom operators:
   - [][]
+
++ from #raku, Voldenet, 2024-04-02T08:54
+
+  my $a = [] but role { method AT-POS($ix) { role { method AT-POS($ix2) { $ix, $ix2 } } } };
+  say $a[3][42]
+
+  multi postcircumfix:<[[ ]]>($array, $a) { $a.map(* + 42) }; my $a = []; $a[[1,2]].say

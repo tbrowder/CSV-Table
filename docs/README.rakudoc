@@ -8,9 +8,15 @@ B<CSV::Table> - Provides routines for querying a CSV file with or without a head
 
 =begin code :lang<raku>
 use CSV::Table;
+# Using a 6x4 row/column matrix for data plus a header row
+# with indexing from zero
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.field.elems;  # OUTPUT: 4 # zero if no header row
-say $t.row.elems;    # OUTPUT: 6 # not counting any header row
+say $t.fields;       # OUTPUT: 4 # zero if no header row
+say $t.rows;         # OUTPUT: 6 # not counting any header row
+say $t.cols;         # OUTPUT: 4
+say $t.field[0]      # OUTPUT: name # Any if no header row
+say $t.cell[0][0]    # OUTPUT: John
+say $t.cell[1][0]    # OUTPUT: Sally
 =end code
 
 =head1 DESCRIPTION
@@ -74,7 +80,7 @@ Automatic determination of separator character
 
 Unless the field separator is selected otherwise, the first line is 
 searched for the most-used separator character from
-this list: C<|>, C<;>, and C<,>.  Other non-space characters may be used
+this list: C<|>, C<;>, C<,> and C<\t>.  Other non-space characters may be used
 but are probably not tested. File an issue if you want to add a
 separator not currently specified.
 =end item
@@ -103,7 +109,7 @@ my $t = CSV::Table.new: :$csv,
 
 Following are the allowable values for the named arguments. The user
 is cautioned that unspecified values are probably not tested. File an
-issue if your value of choice is not specified, and it can be added
+issue if your value of choice is not specified and it can be added
 and tested for.
 
 =item C<:$separator>
@@ -111,6 +117,7 @@ and tested for.
 =item2 comma (C<,>)
 =item2 pipe (C<|>)
 =item2 semicolon (C<;>)
+=item2 tab (C<\t>)
 
 =item C<:$normalize>
 =item2 C<True> [default]
