@@ -15,10 +15,10 @@ my $t = CSV::Table.new: :$csv;
 is $t.trim, True, "trim is True";
 is $t.normalize, True, "normalize is True";
 is $t.separator, ';', "separator is ';'";
-is $t.rows, 1, "num rows 1";
 
 done-testing;
 =finish
+is $t.rows, 1, "num rows 1";
 is $t.fields, 3, "num fields 3";
 is $t.cell[0][0], "Sally Jean,21";
 is $t.cell[0][1], "52";

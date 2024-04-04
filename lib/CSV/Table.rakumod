@@ -1,6 +1,6 @@
 unit class CSV::Table;
 
-use Text::Utils :strip-comment, :normalize-text;
+use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 
 has $.csv is required;
 
@@ -27,9 +27,7 @@ has @.col-width; # max col width in number of characters (.chars)
                  # includes any header row
 
 class Line {
-    # holds the data from processing a line
-    has $.is-header = False; 
-    has $.line is required;
+    # holds the data from processing a header or data line
     has @.arr is rw;
     has @.col-width is rw;
 }
@@ -46,39 +44,51 @@ submethod TWEAK() {
     my $header;
     my @lines;
 
-    # convenience
+    # convenience vars
     my $cchar = $!comment-char;
     my $schar = $!separator;
     note "DEBUG: separator = $!separator" if $debug;
 
+    my @nseps; # keep track of number of separators per line
     LINE: for $!csv.IO.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         $line = strip-comment $line, :mark($cchar);
         next LINE if $line !~~ /\S/; # skip blank lines
         @lines.push: $line;
+        if @lines.elems == 1 {
+            # determine the separator
+            if $!separator ~~ /:i auto / {
+                my $line = @lines.head;
+                $!separator = get-sepchar $line;
+            }
+            note "DEBUG: sepchar = $!separator" if 0 or $debug;
+        }
+        # count sepchars
+        my $ns = count-substrs @lines.tail, $schar;
+        @nseps.push: $ns;
     }
-
-    # determine the separator
-    if $!separator ~~ /:i auto / {
-        my $line = @lines.head;
-        $!separator = get-sepchar $line;
+    # sanity check
+    if @nseps.elems != @lines.elems {
+        die "FATAL: \@nseps.elems ({@nseps.elems}) != \@lines.elems ({@lines.elems})";
     }
-
-    note "DEBUG: sepchar = $!separator" if 0 or $debug;
 
     # process any header and lines now that we know the separator
     my $nfields = 0; 
     my $ncols   = 0;
-    my @arr;
+    my $row; # holds a Line object
     if $!has-header {
         $header = @lines.shift;
-        @arr = process-header $header, :separator($!separator);
-        $nfields = @arr.elems;
-        $ncols   = $nfields;
+        $row = process-header $header, :separator($!separator),
+                              :normalize($!normalize), :trim($!trim);
         # fields are cleaned, trailing empty cells are removed
         #   (but reported) and column widths are initialized
         # assign data to:
-        #   @!fields and @!col-width
+        #   @!field and @!col-width
+        @!field      = $row.arr;
+        @!col-width  = $row.col-width;
+
+        $nfields     = $row.arr.elems;
+        $ncols       = $nfields;
     }
 
     # The $nfields number controls the rest of the data handling depending
@@ -86,72 +96,35 @@ submethod TWEAK() {
     # any trailing empty cells if it is a header.
 
     # With header:
-    #   It is a fatal error if a line has more columns that the header.
     #   Any contiguous empty cells at the end of a header are reported but ignored.
     #   Lines with fewer columns are filled with empty cells.
+    #   It is a fatal error if a line has more columns that the header.
 
     # Without header
     #   All lines are adjusted to have the max number of columns found.
     #   @!fields and associated data are undefined, empty, or zero.
 
-    =begin comment
-    my @ei;  # indices of empty cells
-    my @res; # results
-    for @arr.kv -> $i, $v is copy {
-        # track empty cells
-        if $v !~~ /\S/ {
-            @res.push: $i;
-            @ei.push: $i;
-        }
-        else {
-            @res.push: 'ok';
-        }
+    # the rest of the data lines
+    for @lines.kv -> $line-num, $line {
+        $row = process-line $line, :separator($schar),
+                                   :has-header($!has-header), :$nfields,
+                                   :normalize($!normalize), :trim($!trim);
 
-        if $!normalize {
-            $v = normalize-text $v;
-        }
-        elsif $!trim {
-            $v .= trim;
-        }
-
-        # track the max column width
-        my $w = $v.chars;
-        # the first entry
-        @!col-width[$i] = $w;
-
-        # save the value
-        @!field.push: $v;
-
-        if $!has-header and %!col{$v}:exists {
-            die "FATAL: Duplicate field names are illegal: $v";
-        }
-        else {
-            %!col{$v}     = [];
-            %!colnum{$v}  = $i;
-            %!colname{$i} = $v;
-        }
-    }
-
-    # analyze the header for trailing empty cells
-    if $!has-header {
-        my @c = @ei.reverse;
-        my @empty;
-        for @c -> $i, $v {
+        # assign data to:
+        #   @!cell and @!col-width
+        @!cell.push: $row.arr;
+        for @!col-width.kv -> $i, $w {
+            my $s = $row.arr[$i];
+	    my $rw = 0;
+	    if $s ~~ /\S/ {
+	        $rw = $s.chars;
+	    }
+            if $rw > $w {
+                @!col-width[$i] = $rw;
+            } 
         }
 
         =begin comment
-        # fix this
-        if $ne {
-            note qq:to/HERE/;
-            WARNING: The header row has $ne empty cells.
-            HERE
-        }
-        =end comment
-    }
-    =end comment
-
-    # the rest of the data lines
-    for @lines.kv -> $line-num, $line {
         @arr = $line.split(/$schar/);
         my $ne = @arr.elems;
 
@@ -193,13 +166,16 @@ submethod TWEAK() {
             }
         }
         @!cell.push: @arr;
+        =end comment
     }
 
+    =begin comment
     # correct the table if no header row
     if not $!has-header {
         # Move all header data to the first data row (cell) and empty the field
         # data.
     }
+    =end comment
 }
 
 method save {
@@ -218,10 +194,35 @@ method save {
         }
     }
     else {
+        # TODO check effects for regular and non-standard line-ending
         say "Saving file '$raw-csv'...";
-        # Use proper sepchar, respect max col width
-        # with sprintf
-        say "File '$!csv' was not overwritten.";
+        my $fh = open $raw-csv, :w, :nl-out($!line-ending);
+        # Use proper sepchar, respect max col width # with sprintf
+        my $ne = @!col-width.elems;
+        if $!has-header {
+            for @!field.kv -> $i, $v {
+                my $w = @!col-width[$i];
+                my $s = sprintf "%*.*s", $w, $w, $v;
+                if $i < $ne-1 {
+                    $fh.print: $s;
+                    $fh.print: $!separator;
+                }
+                else {
+                    $fh.say: $s;
+                }
+            }
+        }
+        for @!cell.kv -> $i, $v {
+            my $w = @!col-width[$i];
+            my $s = sprintf "%*.*s", $w, $w, $v;
+            if $i < $ne-1 {
+                $fh.print: $s;
+                $fh.print: $!separator;
+            }
+            else {
+                $fh.say: $s;
+            }
+        }
     }
 }
 
@@ -235,12 +236,97 @@ sub process-header(
     # must pass $!attr values because this sub is called by TWEAK
     $header,
     :$separator!,
+    :$normalize!,
+    :$trim!,
     :$debug,
-    --> Array
+    --> Line 
 ) {
     my @arr = $header.split(/$separator/);
-    @arr
-}
+    my $o = Line.new;
+
+    # fields are cleaned, trailing empty cells are removed
+    #   (but reported) and column widths are initialized
+    # assign data to:
+    #   @!field and @!col-width
+
+    my %dups;
+
+    my @ei;  # indices of empty cells
+    my @res; # results
+    for @arr.kv -> $i, $v is copy {
+        # track empty cells
+        if $v !~~ /\S/ {
+            @res.push: $i;
+            @ei.push: $i;
+        }
+        else {
+            @res.push: 'ok';
+        }
+
+        if $normalize {
+            $v = normalize-text $v;
+        }
+        elsif $trim {
+            $v .= trim;
+        }
+
+        # track the max column width
+        my $w = $v.chars;
+        # the first entry
+        $o.col-width[$i] = $w;
+
+        # check no dups
+        if %dups{$v}:exists {
+            die "FATAL: Duplicate field names are illegal: $v";
+        }
+
+        # save the value
+        $o.arr.push: $v;
+
+            #%!col{$v}     = [];
+            #%!colnum{$v}  = $i;
+            #%!colname{$i} = $v;
+    }
+
+    =begin comment
+       # analyze the header for trailing empty cells
+        my @c = @ei.reverse;
+        my @empty;
+        for @c -> $i, $v {
+        }
+
+        =begin comment
+        # fix this
+        if $ne {
+            note qq:to/HERE/;
+            WARNING: The header row has $ne empty cells.
+            HERE
+        }
+        =end comment
+    =end comment
+    $o;
+    
+} # sub process-header
+
+sub process-line(
+    # must pass $!attr values because this sub is called by TWEAK
+    $line,
+    :$separator!,
+    :$has-header!, # is this needed here? YES
+    :$nfields,
+    :$normalize!,
+    :$trim!,
+    :$debug,
+    --> Line 
+) {
+    my @arr = $line.split(/$separator/);
+
+
+    my $o = Line.new: :$line;
+    $o.arr = @arr;
+    $o;
+    
+} # sub process-line
 
 sub get-sepchar($header, :$debug) {
 
