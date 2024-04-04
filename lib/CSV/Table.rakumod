@@ -73,7 +73,7 @@ submethod TWEAK() {
     }
 
     # process any header and lines now that we know the separator
-    my $nfields = 0; 
+    my $nfields = 0;
     my $ncols   = 0;
     my $row; # holds a Line object
     if $!has-header {
@@ -114,14 +114,14 @@ submethod TWEAK() {
         #   @!cell and @!col-width
         @!cell.push: $row.arr;
         for @!col-width.kv -> $i, $w {
-            my $s = $row.arr[$i];
+            my $s = $row.arr[$i] // "";
 	    my $rw = 0;
 	    if $s ~~ /\S/ {
 	        $rw = $s.chars;
 	    }
             if $rw > $w {
                 @!col-width[$i] = $rw;
-            } 
+            }
         }
 
         =begin comment
@@ -239,7 +239,7 @@ sub process-header(
     :$normalize!,
     :$trim!,
     :$debug,
-    --> Line 
+    --> Line
 ) {
     my @arr = $header.split(/$separator/);
     my $o = Line.new;
@@ -305,7 +305,7 @@ sub process-header(
         =end comment
     =end comment
     $o;
-    
+
 } # sub process-header
 
 sub process-line(
@@ -317,15 +317,44 @@ sub process-line(
     :$normalize!,
     :$trim!,
     :$debug,
-    --> Line 
+    --> Line
 ) {
     my @arr = $line.split(/$separator/);
-
-
     my $o = Line.new: :$line;
-    $o.arr = @arr;
+    my @ei;  # indices of empty cells
+    my @res; # results
+    for @arr.kv -> $i, $v is copy {
+        # track empty cells
+        if $v !~~ /\S/ {
+            @res.push: $i;
+            @ei.push: $i;
+        }
+        else {
+            @res.push: 'ok';
+        }
+
+        if $normalize {
+            $v = normalize-text $v;
+        }
+        elsif $trim {
+            $v .= trim;
+        }
+
+        # track the max column width
+        my $w = $v.chars;
+        # the first entry
+        $o.col-width[$i] = $w;
+
+        # save the value
+        $o.arr.push: $v;
+
+            #%!col{$v}     = [];
+            #%!colnum{$v}  = $i;
+            #%!colname{$i} = $v;
+    }
+
     $o;
-    
+
 } # sub process-line
 
 sub get-sepchar($header, :$debug) {
