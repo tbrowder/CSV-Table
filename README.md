@@ -5,6 +5,8 @@ NAME
 
 **CSV::Table** - Provides routines for querying and modifying a CSV file with or without a header row
 
+Note it requires the `git` program to be installed on the using system.
+
 SYNOPSIS
 ========
 
@@ -84,13 +86,21 @@ It can handle the following which other CSV handlers may not:
 
     * data lines with more fields than its header (fatal, but reported)
 
-    * files are automatically saved by default
-
   * without a header line
 
     * data lines are padded with empty fields to the maximum number of fields found in the file
 
   * either with or without a header line
+
+    * files are automatically saved by default
+
+    * files are automatically saved in a desired git repository selected by:
+
+      * the default specified by the `$!git-repo-dir` option
+
+      * the environment variable ``
+
+      * the contents of the `$HOME`/.Csv-table> file
 
     * lines with trailing whitespace
 
