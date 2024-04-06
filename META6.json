@@ -6,7 +6,6 @@
   "build-depends": [
   ],
   "depends": [
-    "Git::Blame::File",
     "Text::Utils"
   ],
   "description": "Provides routines for manipulating a CSV file with or without a header row",

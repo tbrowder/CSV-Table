@@ -5,8 +5,6 @@ NAME
 
 **CSV::Table** - Provides routines for querying and modifying a CSV file with or without a header row
 
-Note it requires the `git` program to be installed on the using system.
-
 SYNOPSIS
 ========
 
@@ -57,13 +55,7 @@ You can change the value of any cell:
 
 ```
 
-You can choose to save the changed data:
-
-```raku
-$t.save;
-```
-
-The raw and commented file will be automatically save upon normal exit by default.
+You can choose to save the changed data (`$t.save`), but any change triggers an automatic save if the user does not initiate it. The user will be asked to confirm the save.
 
 DESCRIPTION
 ===========
