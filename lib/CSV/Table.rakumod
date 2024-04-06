@@ -1,6 +1,6 @@
 unit class CSV::Table;
 
-use Text::Utils :strip-comment, :normalize-text, :count-substrs;
+use Text::Utils :normalize-text, :count-substrs;
 
 has $.csv is required;
 
@@ -8,9 +8,11 @@ has $.csv is required;
 has $.separator    = 'auto'; # auto, comma, pipe, semicolon, tab
 has $.trim         = True;
 has $.normalize    = True;
+has $.autosave     = True;
 has $.comment-char = '#';
 has $.has-header   = True;
 has $.line-ending  = "\n";
+has $.raw-ending   = "-raw";
 
 # data
 # arrays
@@ -21,6 +23,7 @@ has @.cell;  # array of arrays of row cells (aka "row")
 has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
+has %.comment; # @lines index number 
 
 # other
 has @.col-width; # max col width in number of characters (.chars)
@@ -47,10 +50,26 @@ submethod TWEAK() {
     note "DEBUG: separator = $!separator" if $debug;
 
     my @nseps; # keep track of number of separators per line
+    my $cchar = $!comment-char;
+
     LINE: for $!csv.IO.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
-        $line = strip-comment $line, :mark($!comment-char);
-        next LINE if $line !~~ /\S/; # skip blank lines
+        if $line ~~ /^ \h* $cchar / {
+            # Save the line and retain its postion for reassembly.
+            # We use the %!comment hash with a key as the index number 
+            # of the current last line in the @lines
+            # array (or -1 if this is a beginning comment). Use an array as
+            # value to enable handling multiple, contiguous comment lines.
+            my $idx = @lines.elems ?? (@lines.elems - 1) !! -1;
+            if %!comment{$idx}:exists {
+                %!comment{$idx}.push: $line;
+            }
+            else {
+                %!comment{$idx} = [];
+                %!comment{$idx}.push: $line;
+            }
+            next LINE;
+        }
         @lines.push: $line;
         if @lines.elems == 1 {
             # determine the separator
@@ -223,9 +242,13 @@ method save {
     }
 }
 
-method rowcol($r, $c) { 
+multi method rowcol($r, $c) { 
     @!cell[$r][$c];
 }
+multi method rowcol($r, $c, $val) { 
+    @!cell[$r][$c] = $val;
+}
+
 method rc($r, $c) { self.rowcol($r, $c) }
 method ij($r, $c) { self.rowcol($r, $c) }
 

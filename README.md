@@ -3,23 +3,65 @@
 NAME
 ====
 
-**CSV::Table** - Provides routines for querying a CSV file with or without a header row
+**CSV::Table** - Provides routines for querying and modifying a CSV file with or without a header row
 
 SYNOPSIS
 ========
 
+For example, using an MxN row/column matrix for data plus a header row in a file with the first three lines being:
+
+```raku
+name, age, ...
+John, 40,  ...
+Sally, 38, ...
+...
+```
+
+Handle the file with `CSV::Table` in a Raku program:
+
 ```raku
 use CSV::Table;
-# Using a 6x4 row/column matrix for data plus a header row
 # with indexing from zero
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.fields;       # OUTPUT: 4 # zero if no header row
-say $t.rows;         # OUTPUT: 6 # not counting any header row
-say $t.cols;         # OUTPUT: 4
-say $t.field[0]      # OUTPUT: name # Any if no header row
-say $t.cell[0][0]    # OUTPUT: John
-say $t.cell[1][0]    # OUTPUT: Sally
+say $t.fields;       # OUTPUT: M   # zero if no header row
+say $t.rows;         # OUTPUT: N-1 # N if no header row
+say $t.cols;         # OUTPUT: M
+say $t.field[0];     # OUTPUT: name # Any if no header row
+say $t.cell[0][0];   # OUTPUT: John
 ```
+
+There are multiple ways to query a data cell:
+
+  * by row and column
+
+```raku
+say $t.cell[1][0]    # OUTPUT: Sally
+say $t.rowcol(1, 0); # OUTPUT: Sally
+say $t.rc(1, 0);     # OUTPUT: Sally
+say $t.ij(1, 0);     # OUTPUT: Sally
+```
+
+  * by column and row
+
+```raku
+say $t.colrow(0, 1); # OUTPUT: Sally
+say $t.cr(0, 1);     # OUTPUT: Sally
+say $t.ji(0, 1);     # OUTPUT: Sally
+```
+
+You can change the value of any cell:
+
+```raku
+
+```
+
+You can choose to save the changed data:
+
+```raku
+$t.save;
+```
+
+The raw and commented file will be automatically save upon normal exit by default.
 
 DESCRIPTION
 ===========
@@ -30,7 +72,7 @@ By default, text is 'normalized', that is, it is trimmed of leading and trailing
 
 Input files are read immediately, so very large files may overwhelm system resources. 
 
-It can handle the following which other CSV readers may not:
+It can handle the following which other CSV handlers may not:
 
   * with a header line
 
@@ -41,6 +83,8 @@ It can handle the following which other CSV readers may not:
     * data lines with fewer fields than a header (missing values assumed to be "")
 
     * data lines with more fields than its header (fatal, but reported)
+
+    * files are automatically saved by default
 
   * without a header line
 
@@ -56,7 +100,7 @@ As simple as it is, it also has some uncommon features that are very useful:
 
     This feature, which is not usual in CSV parsers, is to ignore comment lines (which may have leading whitespace), but it and data at or after a comment character are ignored so the line is treated as a blank line. The comment character is user-definable but must not conflict with the chosen field separator.
 
-    There is a `save` method which enables saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
+  * There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
 
   * Text normalization
 

@@ -2,22 +2,65 @@
 
 =head1 NAME
 
-B<CSV::Table> - Provides routines for querying a CSV file with or without a header row
+B<CSV::Table> - Provides routines for querying and modifying a CSV file with or without a header row
 
 =head1 SYNOPSIS
 
+For example, using an MxN row/column matrix for data plus a header row
+in a file with the first three lines being:
+
+=begin code :lang<raku>
+name, age, ...
+John, 40,  ...
+Sally, 38, ...
+...
+=end code
+
+Handle the file with C<CSV::Table> in a Raku program:
+
 =begin code :lang<raku>
 use CSV::Table;
-# Using a 6x4 row/column matrix for data plus a header row
 # with indexing from zero
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.fields;       # OUTPUT: 4 # zero if no header row
-say $t.rows;         # OUTPUT: 6 # not counting any header row
-say $t.cols;         # OUTPUT: 4
-say $t.field[0]      # OUTPUT: name # Any if no header row
-say $t.cell[0][0]    # OUTPUT: John
-say $t.cell[1][0]    # OUTPUT: Sally
+say $t.fields;       # OUTPUT: M   # zero if no header row
+say $t.rows;         # OUTPUT: N-1 # N if no header row
+say $t.cols;         # OUTPUT: M
+say $t.field[0];     # OUTPUT: name # Any if no header row
+say $t.cell[0][0];   # OUTPUT: John
 =end code
+
+There are multiple ways to query a data cell:
+
+=item by row and column
+
+=begin code :lang<raku>
+say $t.cell[1][0]    # OUTPUT: Sally
+say $t.rowcol(1, 0); # OUTPUT: Sally
+say $t.rc(1, 0);     # OUTPUT: Sally
+say $t.ij(1, 0);     # OUTPUT: Sally
+=end code
+
+=item by column and row
+
+=begin code :lang<raku>
+say $t.colrow(0, 1); # OUTPUT: Sally
+say $t.cr(0, 1);     # OUTPUT: Sally
+say $t.ji(0, 1);     # OUTPUT: Sally
+=end code
+
+You can change the value of any cell:
+
+=begin code :lang<raku>
+=end code
+
+You can choose to save the changed data:
+
+=begin code :lang<raku>
+$t.save;
+=end code
+
+The raw and commented file will be automatically
+save upon normal exit by default.
 
 =head1 DESCRIPTION
 
@@ -33,13 +76,14 @@ interior whitespaces are collapsed into single ones.
 Input files are read immediately, so very large files may
 overwhelm system resources. 
 
-It can handle the following which other CSV readers may not:
+It can handle the following which other CSV handlers may not:
 
 =item with a header line
 =item2 normalizing field names
 =item2 header lines with an ending empty field (reported but otherwise ignored)
 =item2 data lines with fewer fields than a header (missing values assumed to be "")
 =item2 data lines with more fields than its header (fatal, but reported)
+=item2 files are automatically saved by default
 
 =item without a header line
 =item2 data lines are padded with empty fields to the maximum number of fields
@@ -58,10 +102,13 @@ lines (which may have leading whitespace), but it and data at or after a
 comment character are ignored so the line is treated as a blank
 line. The comment character is user-definable but must not conflict
 with the chosen field separator.
+=end item
 
-There is a C<save> method which enables saving a "raw" CSV file
-without the comments so the file can be used with conventional CSV
-handlers such as LibreOffice or Excel.
+=begin item
+There is a C<save> method which saves the current state of the CSV file 
+(including comments) as well as saving a "raw" CSV file without the 
+comments so the file can be used with conventional CSV handlers such as 
+LibreOffice or Excel.
 =end item
 
 =begin item

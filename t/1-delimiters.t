@@ -35,5 +35,11 @@ is $t.colrow(1, 0), 52;
 is $t.cr(1, 0), 52;
 is $t.ji(1, 0), 52;
 
+# try changing a value
+$t.cell[0][1] = 48;
+is $t.cell[0][1], 48;
+$t.rowcol(0, 1, 50);
+is $t.cell[0][1], 50;
+
 done-testing;
 
