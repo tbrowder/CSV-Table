@@ -4,6 +4,8 @@
 
 B<CSV::Table> - Provides routines for querying and modifying a CSV file with or without a header row
 
+Note it requires the C<git> program to be installed on the using system.
+
 =head1 SYNOPSIS
 
 For example, using an MxN row/column matrix for data plus a header row
