@@ -6,9 +6,10 @@
   "build-depends": [
   ],
   "depends": [
+    "Git::Blame::File",
     "Text::Utils"
   ],
-  "description": "Provides routines for manipulating a CSV file with a header row",
+  "description": "Provides routines for manipulating a CSV file with or without a header row",
   "license": "Artistic-2.0",
   "name": "CSV::Table",
   "perl": "6.d",

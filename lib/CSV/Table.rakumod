@@ -15,7 +15,7 @@ has $.line-ending  = "\n";
 # data
 # arrays
 has @.field; # array of field names (or 0..N-1 if no header)
-has @.cell;  # array of arrays of row cells
+has @.cell;  # array of arrays of row cells (aka "row")
 
 # hashes
 has %.col;     # field name => @rows
@@ -44,15 +44,12 @@ submethod TWEAK() {
     my $header;
     my @lines;
 
-    # convenience vars
-    my $cchar = $!comment-char;
-    my $schar = $!separator;
     note "DEBUG: separator = $!separator" if $debug;
 
     my @nseps; # keep track of number of separators per line
     LINE: for $!csv.IO.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
-        $line = strip-comment $line, :mark($cchar);
+        $line = strip-comment $line, :mark($!comment-char);
         next LINE if $line !~~ /\S/; # skip blank lines
         @lines.push: $line;
         if @lines.elems == 1 {
@@ -64,7 +61,7 @@ submethod TWEAK() {
             note "DEBUG: sepchar = $!separator" if 0 or $debug;
         }
         # count sepchars
-        my $ns = count-substrs @lines.tail, $schar;
+        my $ns = count-substrs @lines.tail, $!separator;
         @nseps.push: $ns;
     }
     # sanity check
@@ -106,7 +103,7 @@ submethod TWEAK() {
 
     # the rest of the data lines
     for @lines.kv -> $line-num, $line {
-        $row = process-line $line, :separator($schar),
+        $row = process-line $line, :separator($!separator),
                                    :has-header($!has-header), :$nfields,
                                    :normalize($!normalize), :trim($!trim);
 
@@ -226,6 +223,16 @@ method save {
     }
 }
 
+method rowcol($r, $c) { 
+    @!cell[$r][$c];
+}
+method rc($r, $c) { self.rowcol($r, $c) }
+method ij($r, $c) { self.rowcol($r, $c) }
+
+method colrow($c, $r) { self.rowcol($r, $c) }
+method cr($c, $r) { self.rowcol($r, $c) }
+method ji($c, $r) { self.rowcol($r, $c) }
+
 # convenience methods
 method fields  { @!field.elems     }
 method rows    { @!cell.elems      }
@@ -313,14 +320,14 @@ sub process-line(
     $line,
     :$separator!,
     :$has-header!, # is this needed here? YES
-    :$nfields,
+    :$nfields!,
     :$normalize!,
     :$trim!,
     :$debug,
     --> Line
 ) {
     my @arr = $line.split(/$separator/);
-    my $o = Line.new: :$line;
+    my $o = Line.new;
     my @ei;  # indices of empty cells
     my @res; # results
     for @arr.kv -> $i, $v is copy {
