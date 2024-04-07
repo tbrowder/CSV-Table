@@ -91,25 +91,11 @@ This header line is **not** valid (notice the ending comma has no text following
 
     * data lines are padded with empty fields to the maximum number of fields found in the file
 
-  * Either with or without a header line
-
-    * files are automatically saved by default
-
-    * files are automatically saved in a desired git repository selected by:
-
-      * the default specified by the `$!git-repo-dir` option
-
-      * the environment variable ``
-
-      * the contents of the `$HOME`/.Csv-table> file
-
-    * lines with trailing whitespace
-
 As simple as it is, it also has some uncommon features that are very useful:
 
   * Comment lines are allowed
 
-    This feature, which is not usual in CSV parsers, is to ignore comment lines (which may have leading whitespace), but it and data at or after a comment character are ignored so the line is treated as a blank line. The comment character is user-definable but must not conflict with the chosen field separator.
+    This feature, which is not usual in CSV parsers, is to ignore comment lines interspersed between data lines (such lines may have leading whitespace). The comment character is user-definable and its presence invalidates its use as a field separator.
 
   * There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
 
