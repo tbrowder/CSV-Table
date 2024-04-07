@@ -26,7 +26,7 @@ my $t = CSV::Table.new: :csv($my-csv-file);
 say $t.fields;       # OUTPUT: M   # zero if no header row
 say $t.rows;         # OUTPUT: N-1 # N if no header row
 say $t.cols;         # OUTPUT: M
-say $t.field[0];     # OUTPUT: name # Any if no header row
+say $t.field[0];     # OUTPUT: name # (Any) if no header row
 say $t.cell[0][0];   # OUTPUT: John
 ```
 
@@ -56,7 +56,9 @@ $t.cell[0][1] = 48;
 $t.rowcol(0, 1, 50);
 ```
 
-You can choose to save the changed data (`$t.save`), any time, but the user will be asked to confirm the save.
+You can also change the names of fields, but, unless you also change the corresponding field names in the data hashes, you will most likely have problems. It would be much easier to modify the original CSV file.
+
+You can choose to save the changed data (`$t.save`), any time, but you will be asked to confirm the save.
 
 DESCRIPTION
 ===========

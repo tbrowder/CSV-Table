@@ -1,7 +1,6 @@
 use Test;
 use CSV::Table;
 
-
 my $csv = 't/data/delimiters.csv';
 =begin comment
 name, age; height; weight
@@ -40,6 +39,17 @@ $t.cell[0][1] = 48;
 is $t.cell[0][1], 48;
 $t.rowcol(0, 1, 50);
 is $t.cell[0][1], 50;
+
+# test the hashes
+is $t.col<weight>[0], 103;
+
+# possible
+$t.field[0] = "Name";
+is $t.field[0], "Name";
+
+# but that change HAS NOT changed the hash keys
+# TODO make suitable test
+isnt $t.col<Name>[0], 103;
 
 done-testing;
 

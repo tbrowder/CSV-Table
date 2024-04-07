@@ -23,7 +23,6 @@ has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
 has %.comment; # @lines index number 
-has $.changed = False;
 
 # other
 has @.col-width; # max col width in number of characters (.chars)
@@ -105,6 +104,17 @@ submethod TWEAK() {
 
         $nfields     = $row.arr.elems;
         $ncols       = $nfields;
+
+        # assign data to:
+        #   %!col;     # field name => @rows
+        #   %!colnum;  # field name => col number
+        #   %!colname; # col number => field name
+        for @!field.kv -> $i, $nam {
+            %!col{$nam} = []; # array of colunm values
+            %!colnum{$nam} = $i;           
+            %!colname{$i}  = $nam;           
+        }
+
     }
 
     # The $nfields number controls the rest of the data handling depending
@@ -128,9 +138,11 @@ submethod TWEAK() {
 
         # assign data to:
         #   @!cell and @!col-width
+        #   %!col;     # field name => @rows
         @!cell.push: $row.arr;
         for @!col-width.kv -> $i, $w {
             my $s = $row.arr[$i] // "";
+
 	    my $rw = 0;
 	    if $s ~~ /\S/ {
 	        $rw = $s.chars;
@@ -138,6 +150,9 @@ submethod TWEAK() {
             if $rw > $w {
                 @!col-width[$i] = $rw;
             }
+            # the data hash
+            my $nam = %!colname{$i};
+            %!col{$nam}.push: $s;
         }
 
         =begin comment
@@ -200,7 +215,7 @@ method save {
     #   has $.raw-ending   = "-raw";
     my $raw-csv = "{$!csv.basename}";
     $raw-csv ~~ s/'.csv'//;
-    $raw-csv .~ $!raw-ending ~ '.csv';
+    $raw-csv = $raw-csv ~ $!raw-ending ~ '.csv';
 
     my $res;
     if $raw-csv.IO.e {
