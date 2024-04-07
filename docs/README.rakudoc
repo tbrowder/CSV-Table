@@ -103,24 +103,15 @@ field0, field1, field2,
 =item2 data lines are padded with empty fields to the maximum number of fields
 found in the file
 
-=item Either with or without a header line
-=item2 files are automatically saved by default
-=item2 files are automatically saved in a desired git repository selected by:
-=item3 the default specified by the C<$!git-repo-dir> option
-=item3 the environment variable C<>
-=item3 the contents of the C<$HOME>/.Csv-table> file
-=item2 lines with trailing whitespace
-
 As simple as it is, it also has some uncommon features that are very useful:
 
 =begin item
 Comment lines are allowed
 
 This feature, which is not usual in CSV parsers, is to ignore comment
-lines (which may have leading whitespace), but it and data at or after a
-comment character are ignored so the line is treated as a blank
-line. The comment character is user-definable but must not conflict
-with the chosen field separator.
+lines interspersed between data lines (such lines may have leading whitespace).
+The comment character is user-definable and its presence invalidates its
+use as a field separator.
 =end item
 
 =begin item
