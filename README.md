@@ -71,21 +71,27 @@ Input files are read immediately, so very large files may overwhelm system resou
 
 It can handle the following which other CSV handlers may not:
 
-  * with a header line
+  * With a header line
 
     * normalizing field names
-
-    * header lines with an ending empty field (reported but otherwise ignored)
 
     * data lines with fewer fields than a header (missing values assumed to be "")
 
     * data lines with more fields than its header (fatal, but reported)
 
-  * without a header line
+Note header lines with any empty fields causes an exception. This is a valid header line:
+
+    field0, field1, field2
+
+This header line is **not** valid (notice the ending comma has no text following it):
+
+    field0, field1, field2,
+
+  * Without a header line
 
     * data lines are padded with empty fields to the maximum number of fields found in the file
 
-  * either with or without a header line
+  * Either with or without a header line
 
     * files are automatically saved by default
 

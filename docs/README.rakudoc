@@ -81,17 +81,29 @@ overwhelm system resources.
 
 It can handle the following which other CSV handlers may not:
 
-=item with a header line
+=item With a header line
 =item2 normalizing field names
-=item2 header lines with an ending empty field (reported but otherwise ignored)
 =item2 data lines with fewer fields than a header (missing values assumed to be "")
 =item2 data lines with more fields than its header (fatal, but reported)
 
-=item without a header line
+Note header lines with any empty fields causes an exception. This is a valid
+header line:
+
+=begin code
+field0, field1, field2
+=end code
+
+This header line is B<not> valid (notice the ending comma has no text following it):
+
+=begin code
+field0, field1, field2,
+=end code
+
+=item Without a header line
 =item2 data lines are padded with empty fields to the maximum number of fields
 found in the file
 
-=item either with or without a header line
+=item Either with or without a header line
 =item2 files are automatically saved by default
 =item2 files are automatically saved in a desired git repository selected by:
 =item3 the default specified by the C<$!git-repo-dir> option

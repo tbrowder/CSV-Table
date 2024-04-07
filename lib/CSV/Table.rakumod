@@ -336,22 +336,31 @@ sub process-header(
     my $empty-cells = @ei.elems;
     my $num-cells   = @res.elems;
 
-    =begin comment
-       # analyze the header for trailing empty cells
-        my @c = @ei.reverse;
-        my @empty;
-        for @c -> $i, $v {
+    # analyze the header for trailing empty cells
+    my @c = @res.reverse;
+    my @empty;
+    my @name;
+    for @c -> $i, $v {
+        # $v is "empty" or "ok"
+        if $v ~~ /empty/ {
+            @empty.push: $i;
+            if @name.elems {
+                # FATAL empty cell preceding a non-empty cell
+            }
         }
+        else {
+            @name.push: $i;
+        }
+    }
 
-        =begin comment
-        # fix this
-        if $ne {
-            note qq:to/HERE/;
-            WARNING: The header row has $ne empty cells.
-            HERE
-        }
-        =end comment
-    =end comment
+    # if we get here, any empty cells are trailing
+    my $ne = @empty.elems;
+    if $ne {
+        note qq:to/HERE/;
+        WARNING: The header row has $ne trailing empty cells.
+                 They will be deleted and 
+        HERE
+    }
 
     # the Line object
     $o;
