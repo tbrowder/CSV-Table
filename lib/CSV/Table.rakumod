@@ -197,7 +197,11 @@ submethod TWEAK() {
 method save {
     # The input file is $!csv; save its contents
     # without comments as "{$!csv.basename}-raw.csv"
-    my $raw-csv = "{$!csv.basename}-raw.csv";
+    #   has $.raw-ending   = "-raw";
+    my $raw-csv = "{$!csv.basename}";
+    $raw-csv ~~ s/'.csv'//;
+    $raw-csv .~ $!raw-ending ~ '.csv';
+
     my $res;
     if $raw-csv.IO.e {
         say "File '$raw-csv' exists.";
