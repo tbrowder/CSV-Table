@@ -8,7 +8,6 @@ has $.csv is required;
 has $.separator    = 'auto'; # auto, comma, pipe, semicolon, tab
 has $.trim         = True;
 has $.normalize    = True;
-has $.autosave     = True;
 has $.comment-char = '#';
 has $.has-header   = True;
 has $.line-ending  = "\n";
@@ -24,6 +23,7 @@ has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
 has %.comment; # @lines index number 
+has $.changed = False;
 
 # other
 has @.col-width; # max col width in number of characters (.chars)

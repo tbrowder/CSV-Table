@@ -3,7 +3,7 @@
 NAME
 ====
 
-**CSV::Table** - Provides routines for querying and modifying a CSV file with or without a header row
+**CSV::Table** - Provides routines for querying and modifying a CSV file with or without a header row.
 
 SYNOPSIS
 ========
@@ -52,10 +52,11 @@ say $t.ji(0, 1);     # OUTPUT: Sally
 You can change the value of any cell:
 
 ```raku
-
+$t.cell[0][1] = 48;
+$t.rowcol(0, 1, 50);
 ```
 
-You can choose to save the changed data (`$t.save`), but any change triggers an automatic save if the user does not initiate it. The user will be asked to confirm the save.
+You can choose to save the changed data (`$t.save`), any time, but the user will be asked to confirm the save.
 
 DESCRIPTION
 ===========

@@ -2,7 +2,8 @@
 
 =head1 NAME
 
-B<CSV::Table> - Provides routines for querying and modifying a CSV file with or without a header row
+B<CSV::Table> - Provides routines for querying and modifying a CSV file with 
+or without a header row.
 
 =head1 SYNOPSIS
 
@@ -51,11 +52,12 @@ say $t.ji(0, 1);     # OUTPUT: Sally
 You can change the value of any cell:
 
 =begin code :lang<raku>
+$t.cell[0][1] = 48;
+$t.rowcol(0, 1, 50);
 =end code
 
 You can choose to save the changed data (C<$t.save>),
-but any change triggers an automatic save if the user
-does not initiate it.  The user will be asked to confirm the save.
+any time, but the user will be asked to confirm the save.
 
 =head1 DESCRIPTION
 

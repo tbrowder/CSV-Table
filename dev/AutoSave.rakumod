@@ -5,7 +5,6 @@ has $.autosave = True;
 
 my $autosave;
 my $file;
-
 submethod TWEAK {
     $autosave = $!autosave;
     $file     = $!file;
