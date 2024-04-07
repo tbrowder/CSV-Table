@@ -22,7 +22,7 @@ has @.cell;  # array of arrays of row cells (aka "row")
 has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
-has %.comment; # @lines index number 
+has %.comment; # @lines index number
 
 # other
 has @.col-width; # max col width in number of characters (.chars)
@@ -52,12 +52,11 @@ submethod TWEAK() {
     my $cchar = $!comment-char;
 
     my $fh = open $!csv, :r, :nl-in($!line-ending);
-    #LINE: for $!csv.IO.lines -> $line is copy {
     LINE: for $fh.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         if $line ~~ /^ \h* $cchar / {
             # Save the line and retain its postion for reassembly.
-            # We use the %!comment hash with a key as the index number 
+            # We use the %!comment hash with a key as the index number
             # of the current last line in the @lines
             # array (or -1 if this is a beginning comment). Use an array as
             # value to enable handling multiple, contiguous comment lines.
@@ -115,8 +114,8 @@ submethod TWEAK() {
         #   %!colname; # col number => field name
         for @!field.kv -> $i, $nam {
             %!col{$nam} = []; # array of colunm values
-            %!colnum{$nam} = $i;           
-            %!colname{$i}  = $nam;           
+            %!colnum{$nam} = $i;
+            %!colname{$i}  = $nam;
         }
 
     }
@@ -154,63 +153,12 @@ submethod TWEAK() {
             if $rw > $w {
                 @!col-width[$i] = $rw;
             }
-            # the data hash
+
+            # don't forget the data hash
             my $nam = %!colname{$i};
             %!col{$nam}.push: $s;
         }
-
-        =begin comment
-        @arr = $line.split(/$schar/);
-        my $ne = @arr.elems;
-
-        for @arr.kv -> $i, $v is copy {
-            if $!normalize {
-                $v = normalize-text $v;
-            }
-            elsif $!trim {
-                $v .= trim;
-            }
-            else {
-                ; # ok
-            }
-            $v = "" if $v !~~ /\S/;
-            @arr[$i] = $v;
-
-            my $w  = $v.comb.elems;
-            my $cw = @!col-width[$i] // 0;
-            @!col-width[$i] = $w if $w > $cw;
-
-            next if not $!has-header;
-
-            =begin comment
-            # hashes
-            has %.col;     # field name => @rows
-            has %.colnum;  # field name => col number
-            has %.colname; # col number => field name
-            =end comment
-            # how should %!col be structured?
-            # field name is %!colname{$i}
-            my $fnam = %!colname{$i} // "";
-            my $fidx = %!colnum{$i} // -1;
-            if %!col{$fnam}:exists {
-                %!col{$fnam}.push: $v;
-            }
-            else {
-                %!col{$fnam} = [];
-                %!col{$fnam}.push: $v;
-            }
-        }
-        @!cell.push: @arr;
-        =end comment
     }
-
-    =begin comment
-    # correct the table if no header row
-    if not $!has-header {
-        # Move all header data to the first data row (cell) and empty the field
-        # data.
-    }
-    =end comment
 }
 
 method save {
@@ -265,10 +213,10 @@ method save {
     }
 }
 
-multi method rowcol($r, $c) { 
+multi method rowcol($r, $c) {
     @!cell[$r][$c];
 }
-multi method rowcol($r, $c, $val) { 
+multi method rowcol($r, $c, $val) {
     @!cell[$r][$c] = $val;
 }
 
@@ -285,6 +233,30 @@ method rows    { @!cell.elems      }
 method cols    { @!cell.head.elems }
 method columns { @!cell.head.elems }
 
+method !process-header(
+    # must pass $!attr values because this sub is called by TWEAK
+    $header,
+    #:$separator!,
+    #:$normalize!,
+    #:$trim!,
+    :$debug,
+    --> Line
+    ) {
+} # method !process-header
+
+method !process-line(
+    # uses $!attr values
+    $line,
+    #:$separator!,
+    #:$has-header!, # is this needed here? YES
+    #:$nfields!,
+    #:$normalize!,
+    #:$trim!,
+    :$debug,
+    #--> Line
+    ) {
+} # method !process-line
+
 sub process-header(
     # must pass $!attr values because this sub is called by TWEAK
     $header,
@@ -292,7 +264,7 @@ sub process-header(
     :$normalize!,
     :$trim!,
     :$debug,
-    --> Line
+    #--> Line
 ) {
     my @arr = $header.split(/$separator/);
     my $o = Line.new;
@@ -302,14 +274,15 @@ sub process-header(
     # assign data to:
     #   @!field and @!col-width
 
-    my %dups;
+    my %field; # name => index
+    my %dups;  # name => [] # list of indices
 
     my @ei;  # indices of empty cells
     my @res; # results
     for @arr.kv -> $i, $v is copy {
         # track empty cells
         if $v !~~ /\S/ {
-            @res.push: $i;
+            @res.push: 'empty';
             @ei.push: $i;
         }
         else {
@@ -329,17 +302,39 @@ sub process-header(
         $o.col-width[$i] = $w;
 
         # check no dups
-        if %dups{$v}:exists {
-            die "FATAL: Duplicate field names are illegal: $v";
+        if %field{$v}:exists {
+            if %dups{$v}:exist {
+                %dups{$v}.push: $i;
+            }
+            else {
+                %dups{$v} = [];
+                %dups{$v}.push: $i;
+            }
+        }
+        else {
+            %field{$v} = $i;
         }
 
         # save the value
         $o.arr.push: $v;
-
-            #%!col{$v}     = [];
-            #%!colnum{$v}  = $i;
-            #%!colname{$i} = $v;
     }
+    # now check for dups
+    if %dups.elems {
+        note "FATAL: Duplicate field names are illegal:";
+        for %dups.keys -> $f {
+            print "  name: $f; at indices:";
+            my @a = @(%dups{$f});
+            for @a.kv -> $i, $v {
+                print "," if $i;
+                print " $v";
+            }
+            note();
+        }
+        exit;
+    }
+
+    my $empty-cells = @ei.elems;
+    my $num-cells   = @res.elems;
 
     =begin comment
        # analyze the header for trailing empty cells
@@ -357,6 +352,8 @@ sub process-header(
         }
         =end comment
     =end comment
+
+    # the Line object
     $o;
 
 } # sub process-header
@@ -374,18 +371,18 @@ sub process-line(
 ) {
     my @arr = $line.split(/$separator/);
     my $o = Line.new;
+
     my @ei;  # indices of empty cells
-    my @res; # results
+    my @res; # results (empty or ok)
     for @arr.kv -> $i, $v is copy {
         # track empty cells
         if $v !~~ /\S/ {
-            @res.push: $i;
+            @res.push: 'empty';
             @ei.push: $i;
         }
         else {
             @res.push: 'ok';
         }
-
         if $normalize {
             $v = normalize-text $v;
         }
@@ -400,12 +397,21 @@ sub process-line(
 
         # save the value
         $o.arr.push: $v;
+    }
+    my $empty-cells = @ei.elems;
+    my $num-cells   = @res.elems;
 
-            #%!col{$v}     = [];
-            #%!colnum{$v}  = $i;
-            #%!colname{$i} = $v;
+    if $has-header {
+        if $o.arr.elems > $nfields {
+            # 
+        }
+        elsif $o.arr.elems < $nfields {
+        }
+    }
+    else {
     }
 
+    # the Line object
     $o;
 
 } # sub process-line
@@ -432,5 +438,6 @@ sub get-sepchar($header, :$debug) {
             $V = $v;
         }
     }
+    # the most used sepchar
     $C
 }

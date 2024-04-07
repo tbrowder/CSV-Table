@@ -4,7 +4,7 @@
 my $csv = "line-enders.csv"; # a local copy of the above
 my $line-ending = '||';
 
-my $chomp = True;
+#my $chomp = True;
 my $fh = open $csv, :nl-in($line-ending);
 for $fh.lines -> $line is copy {
    #$line ~~ s:g/\s**2/ /;
