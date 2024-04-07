@@ -51,7 +51,9 @@ submethod TWEAK() {
     my @nseps; # keep track of number of separators per line
     my $cchar = $!comment-char;
 
-    LINE: for $!csv.IO.lines -> $line is copy {
+    my $fh = open $!csv, :r, :nl-in($!line-ending);
+    #LINE: for $!csv.IO.lines -> $line is copy {
+    LINE: for $fh.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         if $line ~~ /^ \h* $cchar / {
             # Save the line and retain its postion for reassembly.
@@ -82,6 +84,8 @@ submethod TWEAK() {
         my $ns = count-substrs @lines.tail, $!separator;
         @nseps.push: $ns;
     }
+    $fh.close;
+
     # sanity check
     if @nseps.elems != @lines.elems {
         die "FATAL: \@nseps.elems ({@nseps.elems}) != \@lines.elems ({@lines.elems})";
