@@ -95,7 +95,12 @@ As simple as it is, it also has some uncommon features that are very useful:
 
   * Comment lines are allowed
 
-    This feature, which is not usual in CSV parsers, is to ignore comment lines interspersed between data lines (such lines may have leading whitespace). The comment character is user-definable and its presence invalidates its use as a field separator.
+    This feature, which is not usual in CSV parsers, is to ignore comment lines interspersed between data lines (such lines may have leading whitespace). Data lines may have inline comments following a comment character. The comment character is user-definable and its presence invalidates its use as a field separator. The default comment character is '#'. Its use demonstrated:
+
+          # a comment preceding a data line
+        1, 2, 3 # an inline comment following the data
+
+    Note comments are preserved and restored when the CSV file is saved.
 
   * There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
 
