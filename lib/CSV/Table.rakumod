@@ -1,6 +1,6 @@
 unit class CSV::Table;
 
-use Text::Utils :normalize-text, :count-substrs;
+use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 
 has $.csv is required;
 
@@ -22,11 +22,16 @@ has @.cell;  # array of arrays of row cells (aka "row")
 has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
-has %.comment; # @lines index number
+has %.comment; # @lines index number => Comment
 
 # other
 has @.col-width; # max col width in number of characters (.chars)
                  # includes any header row
+
+class Comment {
+    has $.comment; # inline
+    has @.trailing = []; # one or more comment-only lines
+}
 
 class Line {
     # holds the data from processing a header or data line
@@ -54,23 +59,39 @@ submethod TWEAK() {
     my $fh = open $!csv, :r, :nl-in($!line-ending);
     LINE: for $fh.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
-        if $line ~~ /^ \h* $cchar / {
-            # Save the line and retain its postion for reassembly.
-            # We use the %!comment hash with a key as the index number
-            # of the current last line in the @lines
-            # array (or -1 if this is a beginning comment). Use an array as
-            # value to enable handling multiple, contiguous comment lines.
-            my $idx = @lines.elems ?? (@lines.elems - 1) !! -1;
+        my $comment;
+        ($line, $comment) = strip-comment $line, :save-comment;
+        # Comment lines:
+        # Save the line and retain its postion for reassembly.
+        # We use the %!comment hash with a key as the index number
+        # of the current last line in the @lines
+        # array (or -1 if this is a beginning comment). Use an array as
+        # value to enable handling multiple, contiguous comment lines.
+        # The first array position is reserved for inline trailing
+        # comments.
+            
+        # Note we could have a line with just one or more comment chars and
+        # there also may be whitespace
+        my ($c, $idx);
+
+        if $line ~~ /\S/ {
+            @lines.push: $line;
+            # count sepchars
+            my $ns = count-substrs @lines.tail, $!separator;
+            @nseps.push: $ns;
+        }
+
+        if $comment ~~ /\S/ {
+            $idx = @lines.elems ?? (@lines.elems - 1) !! -1;
             if %!comment{$idx}:exists {
-                %!comment{$idx}.push: $line;
+                %!comment{$idx}.trailing.push: $comment;
             }
             else {
-                %!comment{$idx} = [];
-                %!comment{$idx}.push: $line;
+                %!comment{$idx} = Comment.new;
+                %!comment{$idx}.trailing.push: $comment;
             }
-            next LINE;
         }
-        @lines.push: $line;
+
         if @lines.elems == 1 {
             # determine the separator
             if $!separator ~~ /:i auto / {
@@ -79,9 +100,6 @@ submethod TWEAK() {
             }
             note "DEBUG: sepchar = $!separator" if 0 or $debug;
         }
-        # count sepchars
-        my $ns = count-substrs @lines.tail, $!separator;
-        @nseps.push: $ns;
     }
     $fh.close;
 
@@ -269,8 +287,9 @@ sub process-header(
     my @arr = $header.split(/$separator/);
     my $o = Line.new;
 
-    # fields are cleaned, trailing empty cells are removed
-    #   (but reported) and column widths are initialized
+    # fields are cleaned
+    # empty cells fire an exception
+    # column widths are initialized
     # assign data to:
     #   @!field and @!col-width
 
@@ -279,14 +298,17 @@ sub process-header(
 
     my @ei;  # indices of empty cells
     my @res; # results
+    my @ri;  # indices of @res
     for @arr.kv -> $i, $v is copy {
         # track empty cells
         if $v !~~ /\S/ {
             @res.push: 'empty';
             @ei.push: $i;
+            @ri.push: $i;
         }
         else {
             @res.push: 'ok';
+            @ri.push: $i;
         }
 
         if $normalize {
@@ -318,6 +340,7 @@ sub process-header(
         # save the value
         $o.arr.push: $v;
     }
+
     # now check for dups
     if %dups.elems {
         note "FATAL: Duplicate field names are illegal:";
@@ -340,12 +363,14 @@ sub process-header(
     my @c = @res.reverse;
     my @empty;
     my @name;
-    for @c -> $i, $v {
+    for @c.kv -> $i, $v {
         # $v is "empty" or "ok"
         if $v ~~ /empty/ {
             @empty.push: $i;
             if @name.elems {
-                # FATAL empty cell preceding a non-empty cell
+                note qq:to/HERE/;
+                FATAL: field index $i is empty and precedes
+                HERE
             }
         }
         else {

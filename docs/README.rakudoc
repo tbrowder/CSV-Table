@@ -110,8 +110,18 @@ Comment lines are allowed
 
 This feature, which is not usual in CSV parsers, is to ignore comment
 lines interspersed between data lines (such lines may have leading whitespace).
+Data lines may have inline comments following a comment character.
 The comment character is user-definable and its presence invalidates its
-use as a field separator.
+use as a field separator. The default comment character is '#'. Its use
+demonstrated:
+
+=begin code
+  # a comment preceding a data line
+1, 2, 3 # an inline comment following the data
+=end code
+
+Note comments are preserved and restored when the CSV file is saved.
+
 =end item
 
 =begin item

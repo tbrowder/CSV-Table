@@ -1,6 +1,14 @@
 use Test;
 use CSV::Table;
 
+=begin comment
+# a commented CSV file
+name, age
+# Sally is my sister
+Sally   Jean,21 # she really is
+  # another comment
+=end comment
+
 my $csv = 't/data/commented.csv';
 is $csv.IO.r, True;
 
