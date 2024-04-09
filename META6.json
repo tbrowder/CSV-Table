@@ -6,7 +6,7 @@
   "build-depends": [
   ],
   "depends": [
-    "Text::Utils"
+    "Text::Utils:ver<3.4.0+>"
   ],
   "description": "Provides routines for manipulating a CSV file with or without a header row",
   "license": "Artistic-2.0",

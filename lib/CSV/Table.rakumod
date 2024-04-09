@@ -71,9 +71,15 @@ submethod TWEAK() {
         note "DEBUG: line = $line" if $debug;
         my $comment;
 
+        # TODO may not need this if I modify Text::Utils to retain the whole string
         # count first comment char TODO
+        # a var to hold a string to mark saved comment text
+        my $lead = "";
+        if $line.contains($!comment-char) {
+            $lead = "{$!comment-char} ";
+        }
 
-        my $nc = count-substr $
+
         ($line, $comment) = strip-comment $line, :save-comment;
         # Comment lines:
         # Save the line and retain its postion for reassembly.
