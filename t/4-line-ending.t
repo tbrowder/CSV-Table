@@ -35,5 +35,4 @@ is $t.cell[1][1], '30';
 is $t.cell[1][2], 'male';
 
 done-testing;
-=finish
 

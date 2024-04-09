@@ -12,6 +12,7 @@ has $.comment-char = '#';
 has $.has-header   = True;
 has $.line-ending  = "\n";
 has $.raw-ending   = "-raw";
+has $.raw-csv;
 
 # data
 # arrays
@@ -29,7 +30,7 @@ has @.col-width; # max col width in number of characters (.chars)
                  # includes any header row
 
 class Comment {
-    has $.comment; # inline
+    has $.inline   = 0;  # inline after the comment char
     has @.trailing = []; # one or more comment-only lines
 }
 
@@ -44,8 +45,15 @@ submethod TWEAK() {
     my $debug = 0;
 
     die "FATAL: File '$!csv' not found" unless $!csv.IO.r;
-    # read the csv file ignoring comments
 
+    # The input file is $!csv; save its contents
+    # without comments as "{$!csv.basename}-raw.csv"
+    #   has $.raw-ending   = "-raw";
+    $!raw-csv = $!csv; # put in same dir.IO.basename;
+    $!raw-csv ~~ s/:i '.csv'//;
+    $!raw-csv = $!raw-csv ~ $!raw-ending ~ '.csv';
+
+    # read the csv file and strip and collect comments
     # Get the raw lines while collecting some info
 
     my $header;
@@ -54,21 +62,26 @@ submethod TWEAK() {
     note "DEBUG: separator = $!separator" if $debug;
 
     my @nseps; # keep track of number of separators per line
+    my $maxseps = 0;
+
     my $cchar = $!comment-char;
 
     my $fh = open $!csv, :r, :nl-in($!line-ending);
     LINE: for $fh.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         my $comment;
+
+        # count first comment char TODO
+
+        my $nc = count-substr $
         ($line, $comment) = strip-comment $line, :save-comment;
         # Comment lines:
         # Save the line and retain its postion for reassembly.
         # We use the %!comment hash with a key as the index number
         # of the current last line in the @lines
-        # array (or -1 if this is a beginning comment). Use an array as
-        # value to enable handling multiple, contiguous comment lines.
-        # The first array position is reserved for inline trailing
-        # comments.
+        # array (or -1 if this is a beginning comment). Use a Comment
+
+        # object to save data.
             
         # Note we could have a line with just one or more comment chars and
         # there also may be whitespace
@@ -79,6 +92,7 @@ submethod TWEAK() {
             # count sepchars
             my $ns = count-substrs @lines.tail, $!separator;
             @nseps.push: $ns;
+            $maxseps = $ns if $ns > $maxseps;
         }
 
         if $comment ~~ /\S/ {
@@ -137,6 +151,9 @@ submethod TWEAK() {
         }
 
     }
+    else {
+        $nfields = $maxseps;
+    }
 
     # The $nfields number controls the rest of the data handling depending
     # on whether we have a header or not. It will be adjusted to omit
@@ -156,7 +173,6 @@ submethod TWEAK() {
         $row = process-line $line, :separator($!separator),
                                    :has-header($!has-header), :$nfields,
                                    :normalize($!normalize), :trim($!trim);
-
         # assign data to:
         #   @!cell and @!col-width
         #   %!col;     # field name => @rows
@@ -179,29 +195,38 @@ submethod TWEAK() {
     }
 }
 
-method save {
-    # The input file is $!csv; save its contents
-    # without comments as "{$!csv.basename}-raw.csv"
-    #   has $.raw-ending   = "-raw";
-    my $raw-csv = "{$!csv.basename}";
-    $raw-csv ~~ s/'.csv'//;
-    $raw-csv = $raw-csv ~ $!raw-ending ~ '.csv';
+method save(:$force) {
 
-    my $res;
-    if $raw-csv.IO.e {
-        say "File '$raw-csv' exists.";
-        $res = prompt "Overwrite file '$raw-csv'? (Y/n) ";
+    my $f  = $!raw-csv;
+    my $f2 = $!csv;
+    my $wraw = $force ?? True !! False;
+    my $wcsv = $force ?? True !! False;
+
+    if not $force and $!raw-csv.IO.e {
+        say "File '$f' exists.";
+        my $res = prompt "Overwrite file '$f'? (Y/n) ";
         if $res ~~ /:i y/ {
-            say "Overwriting file '$raw-csv'...";
+            $wraw = True;
+            say "Overwriting file '$f'...";
         }
         else {
-            say "File '$!csv' was not overwritten.";
+            say "File '$f' was not overwritten.";
         }
     }
-    else {
-        # TODO check effects for regular and non-standard line-ending
-        say "Saving file '$raw-csv'...";
-        my $fh = open $raw-csv, :w, :nl-out($!line-ending);
+    if not $force and $!csv.IO.e {
+        say "File '$f2' exists.";
+        my $res = prompt "Overwrite file '$f2'? (Y/n) ";
+        if $res ~~ /:i y/ {
+            $wcsv = True;
+            say "Overwriting file '$f2'...";
+        }
+        else {
+            say "File '$f2' was not overwritten.";
+        }
+    }
+
+    if $wraw {
+        my $fh = open $!raw-csv, :w, :nl-out($!line-ending);
         # Use proper sepchar, respect max col width # with sprintf
         my $ne = @!col-width.elems;
         if $!has-header {
@@ -383,8 +408,18 @@ sub process-header(
     if $ne {
         note qq:to/HERE/;
         WARNING: The header row has $ne trailing empty cells.
-                 They will be deleted and 
+                 They will be deleted may affect data rows.
         HERE
+        my @tmp = $o.arr;
+        $o.arr = [];
+        CELL: for @tmp -> $v {
+            if $v ~~ /\S/ {
+                $o.arr.push: $v;
+            }
+            else {
+                last CELL;
+            }
+        }
     }
 
     # the Line object
@@ -437,12 +472,19 @@ sub process-line(
 
     if $has-header {
         if $o.arr.elems > $nfields {
-            # 
+            # TODO report and abort
         }
         elsif $o.arr.elems < $nfields {
+            while $o.arr.elems < $nfields {
+                $o.arr.push: "";
+            }
         }
     }
     else {
+        # pad to max ncols
+        while $o.arr.elems < $nfields {
+            $o.arr.push: "";
+        }
     }
 
     # the Line object
