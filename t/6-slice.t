@@ -28,3 +28,5 @@ dies-ok { @arr = $t.slice(-1..4, 4..4) }
 dies-ok { @arr = $t.slice(4..4, -1..4) }
 dies-ok { @arr = $t.slice(4..5, 4..4) }
 dies-ok { @arr = $t.slice(4..4, 4..5) }
+
+done-testing;

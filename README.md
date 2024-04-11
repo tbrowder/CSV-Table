@@ -75,7 +75,7 @@ It can handle the following which other CSV handlers may not:
 
     * normalizing field names
 
-    * data lines with fewer fields than a header (missing values assumed to be "")
+    * data lines with fewer fields than a header (missing values assumed to be "" or the user can choose the default value)
 
     * data lines with more fields than its header (fatal, but reported)
 
@@ -89,9 +89,13 @@ This header line is **not** valid (notice the ending comma has no text following
 
   * Without a header line
 
-    * data lines are padded with empty fields to the maximum number of fields found in the file
+    * data lines are padded with empty fields to the maximum number of fields found in the file (or the user's chosen value)
 
 As simple as it is, it also has some uncommon features that are very useful:
+
+  * Its `slice` method enables extraction of an M'xN' sub-array of the data cells
+
+    The `slice` arguments are two range values defining the rows and columns zero-indexed cell indices of the desired sub-array.
 
   * Comment lines are allowed
 

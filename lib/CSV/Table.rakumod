@@ -176,8 +176,9 @@ submethod TWEAK() {
 
     # the rest of the data lines
     for @lines.kv -> $line-num, $line {
-        $row = process-line $line, :separator($!separator),
+        $row = process-line $line, :separator($!separator), :$line-num,
                                    :has-header($!has-header), :$nfields,
+                                   :empty-cell-value($!empty-cell-value),
                                    :normalize($!normalize), :trim($!trim);
         # assign data to:
         #   @!cell and @!col-width
@@ -477,10 +478,12 @@ sub process-header(
 sub process-line(
     # must pass $!attr values because this sub is called by TWEAK
     $line,
+    :$line-num!,
     :$separator!,
     :$has-header!, # is this needed here? YES
     :$nfields!,
     :$normalize!,
+    :$empty-cell-value!,
     :$trim!,
     :$debug,
     --> Line
@@ -519,11 +522,14 @@ sub process-line(
 
     if $has-header {
         if $o.arr.elems > $nfields {
-            # TODO report and abort
+            die qq:to/HERE/;
+            FATAL: Data row with index $line-num has more cells ({$o.arr.elems}) than 
+                   the header row which has only $nfields.
+            HERE
         }
         elsif $o.arr.elems < $nfields {
             while $o.arr.elems < $nfields {
-                $o.arr.push: "";
+                $o.arr.push: $empty-cell-value;
             }
         }
     }
