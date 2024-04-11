@@ -23,11 +23,11 @@ Handle the file with `CSV::Table` in a Raku program:
 use CSV::Table;
 # with indexing from zero
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.fields;       # OUTPUT: M   # zero if no header row
-say $t.rows;         # OUTPUT: N-1 # N if no header row
-say $t.cols;         # OUTPUT: M
-say $t.field[0];     # OUTPUT: name # (Any) if no header row
-say $t.cell[0][0];   # OUTPUT: John
+say $t.fields;       # OUTPUT: «M␤»     # zero if no header row
+say $t.rows;         # OUTPUT: «N-1␤»   # N if no header row
+say $t.cols;         # OUTPUT: «M␤»
+say $t.field[0];     # OUTPUT: «name␤»  # (Any) if no header row
+say $t.cell[0][0];   # OUTPUT: «John␤»
 ```
 
 There are multiple ways to query a data cell:
@@ -35,18 +35,18 @@ There are multiple ways to query a data cell:
   * by row and column
 
 ```raku
-say $t.cell[1][0]    # OUTPUT: Sally
-say $t.rowcol(1, 0); # OUTPUT: Sally
-say $t.rc(1, 0);     # OUTPUT: Sally
-say $t.ij(1, 0);     # OUTPUT: Sally
+say $t.cell[1][0]    # OUTPUT: «Sally␤»
+say $t.rowcol(1, 0); # OUTPUT: «Sally␤»
+say $t.rc(1, 0);     # OUTPUT: «Sally␤»
+say $t.ij(1, 0);     # OUTPUT: «Sally␤»
 ```
 
   * by column and row
 
 ```raku
-say $t.colrow(0, 1); # OUTPUT: Sally
-say $t.cr(0, 1);     # OUTPUT: Sally
-say $t.ji(0, 1);     # OUTPUT: Sally
+say $t.colrow(0, 1); # OUTPUT: «Sally␤»
+say $t.cr(0, 1);     # OUTPUT: «Sally␤»
+say $t.ji(0, 1);     # OUTPUT: «Sally␤»
 ```
 
 You can change the value of any cell:
@@ -63,11 +63,11 @@ You can choose to save the changed data (`$t.save`), any time, but you will be a
 DESCRIPTION
 ===========
 
-**CSV::Table** is a class enabling access to a CSV table's contents. Tables with a header row must have unique field names. 
+**CSV::Table** is a class enabling access to a CSV table's contents. Tables with a header row must have unique field names.
 
 By default, text is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single ones.
 
-Input files are read immediately, so very large files may overwhelm system resources. 
+Input files are read immediately, so very large files may overwhelm system resources.
 
 It can handle the following which other CSV handlers may not:
 
@@ -103,6 +103,8 @@ As simple as it is, it also has some uncommon features that are very useful:
 
           # a comment preceding a data line
         1, 2, 3 # an inline comment following the data
+         # ending
+        # comments
 
     Note comments are preserved and restored when the CSV file is saved.
 
@@ -132,12 +134,12 @@ It cannot currently handle:
 Constructor with default options
 --------------------------------
 
-    my $t = CSV::Table.new: :$csv, 
+    my $t = CSV::Table.new: :$csv,
                             :has-header=True,
-                            :separator='auto', 
-                            :normalize=True, 
-                            :trim=True, 
-                            :comment-char='#', 
+                            :separator='auto',
+                            :normalize=True,
+                            :trim=True,
+                            :comment-char='#',
                             :line-ending="\n"
                             ;
 
@@ -203,7 +205,7 @@ The table's data cells can also be accessed by field name and row number:
 CREDITS
 =======
 
-Thanks to @lizmat and @[Coke] for pushing for a more robust CSV handling module including quotes and newlines. 
+Thanks to @lizmat and @[Coke] for pushing for a more robust CSV handling module including quotes and newlines.
 
 Thanks to @librasteve for the idea of the `slice` method and his suggestion of aliases `slice2d` and `view` for `slice`.
 

@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-B<CSV::Table> - Provides routines for querying and modifying a CSV file with 
+B<CSV::Table> - Provides routines for querying and modifying a CSV file with
 or without a header row.
 
 =head1 SYNOPSIS
@@ -23,11 +23,11 @@ Handle the file with C<CSV::Table> in a Raku program:
 use CSV::Table;
 # with indexing from zero
 my $t = CSV::Table.new: :csv($my-csv-file);
-say $t.fields;       # OUTPUT: M   # zero if no header row
-say $t.rows;         # OUTPUT: N-1 # N if no header row
-say $t.cols;         # OUTPUT: M
-say $t.field[0];     # OUTPUT: name # (Any) if no header row
-say $t.cell[0][0];   # OUTPUT: John
+say $t.fields;       # OUTPUT: «M␤»     # zero if no header row
+say $t.rows;         # OUTPUT: «N-1␤»   # N if no header row
+say $t.cols;         # OUTPUT: «M␤»
+say $t.field[0];     # OUTPUT: «name␤»  # (Any) if no header row
+say $t.cell[0][0];   # OUTPUT: «John␤»
 =end code
 
 There are multiple ways to query a data cell:
@@ -35,18 +35,18 @@ There are multiple ways to query a data cell:
 =item by row and column
 
 =begin code :lang<raku>
-say $t.cell[1][0]    # OUTPUT: Sally
-say $t.rowcol(1, 0); # OUTPUT: Sally
-say $t.rc(1, 0);     # OUTPUT: Sally
-say $t.ij(1, 0);     # OUTPUT: Sally
+say $t.cell[1][0]    # OUTPUT: «Sally␤»
+say $t.rowcol(1, 0); # OUTPUT: «Sally␤»
+say $t.rc(1, 0);     # OUTPUT: «Sally␤»
+say $t.ij(1, 0);     # OUTPUT: «Sally␤»
 =end code
 
 =item by column and row
 
 =begin code :lang<raku>
-say $t.colrow(0, 1); # OUTPUT: Sally
-say $t.cr(0, 1);     # OUTPUT: Sally
-say $t.ji(0, 1);     # OUTPUT: Sally
+say $t.colrow(0, 1); # OUTPUT: «Sally␤»
+say $t.cr(0, 1);     # OUTPUT: «Sally␤»
+say $t.ji(0, 1);     # OUTPUT: «Sally␤»
 =end code
 
 You can change the value of any cell:
@@ -56,28 +56,25 @@ $t.cell[0][1] = 48;
 $t.rowcol(0, 1, 50);
 =end code
 
-You can also change the names of fields, but, unless
-you also change the corresponding field names in
-the data hashes, you will most likely have problems.
-It would be much easier to modify the original
-CSV file.
+You can also change the names of fields, but, unless you also change
+the corresponding field names in the data hashes, you will most likely
+have problems.  It would be much easier to modify the original CSV
+file.
 
-You can choose to save the changed data (C<$t.save>),
-any time, but you will be asked to confirm the save.
+You can choose to save the changed data (C<$t.save>), any time, but
+you will be asked to confirm the save.
 
 =head1 DESCRIPTION
 
 B<CSV::Table> is a class enabling access to a CSV table's
-contents. Tables with a header
-row must have unique field names. 
+contents. Tables with a header row must have unique field names.
 
-By default,
-text is 'normalized', that is, it is trimmed
-of leading and trailing whitespace and multiple contiguous
-interior whitespaces are collapsed into single ones.
+By default, text is 'normalized', that is, it is trimmed of leading
+and trailing whitespace and multiple contiguous interior whitespaces
+are collapsed into single ones.
 
-Input files are read immediately, so very large files may
-overwhelm system resources. 
+Input files are read immediately, so very large files may overwhelm
+system resources.
 
 It can handle the following which other CSV handlers may not:
 
@@ -104,7 +101,8 @@ field0, field1, field2,
 =item2 data lines are padded with empty fields to the maximum number of fields
 found in the file (or the user's chosen value)
 
-As simple as it is, it also has some uncommon features that are very useful:
+As simple as it is, it also has some uncommon features that are very
+useful:
 
 =begin item
 Its C<slice> method enables extraction of an M'xN' sub-array of the data cells
@@ -126,6 +124,8 @@ demonstrated:
 =begin code
   # a comment preceding a data line
 1, 2, 3 # an inline comment following the data
+ # ending
+# comments
 =end code
 
 Note comments are preserved and restored when the CSV file is saved.
@@ -133,9 +133,9 @@ Note comments are preserved and restored when the CSV file is saved.
 =end item
 
 =begin item
-There is a C<save> method which saves the current state of the CSV file 
-(including comments) as well as saving a "raw" CSV file without the 
-comments so the file can be used with conventional CSV handlers such as 
+There is a C<save> method which saves the current state of the CSV file
+(including comments) as well as saving a "raw" CSV file without the
+comments so the file can be used with conventional CSV handlers such as
 LibreOffice or Excel.
 =end item
 
@@ -153,7 +153,7 @@ whitespace (unless C<trim=False>).
 =begin item
 Automatic determination of separator character
 
-Unless the field separator is selected otherwise, the first line is 
+Unless the field separator is selected otherwise, the first line is
 searched for the most-used separator character from
 this list: C<|>, C<;>, C<,> and C<\t>.  Other non-space characters may be used
 but are probably not tested. File an issue if you want to add a
@@ -172,12 +172,12 @@ It cannot currently handle:
 =head2 Constructor with default options
 
 =begin code
-my $t = CSV::Table.new: :$csv, 
+my $t = CSV::Table.new: :$csv,
                         :has-header=True,
-                        :separator='auto', 
-                        :normalize=True, 
-                        :trim=True, 
-                        :comment-char='#', 
+                        :separator='auto',
+                        :normalize=True,
+                        :trim=True,
+                        :comment-char='#',
                         :line-ending="\n"
                         ;
 =end code
@@ -236,7 +236,7 @@ $t.col{$field-name}{$row-number}
 =head1 CREDITS
 
 Thanks to @lizmat and @[Coke] for pushing for a more robust CSV handling
-module including quotes and newlines. 
+module including quotes and newlines.
 
 Thanks to @librasteve for the idea of the C<slice> method and his suggestion of aliases C<slice2d> and C<view>
 for C<slice>.
