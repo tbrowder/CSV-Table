@@ -202,6 +202,14 @@ submethod TWEAK() {
     }
 }
 
+method slice2d(Range $rows, Range $cols --> Array) {
+    # thanks @librasteve
+    self.slice: $rows, $cols
+}
+method view(Range $rows, Range $cols --> Array) {
+    # thanks @librasteve
+    self.slice: $rows, $cols
+}
 method slice(Range $rows, Range $cols --> Array) {
     my $upper-row = $rows.head;
     my $lower-row = $rows.tail;
@@ -301,7 +309,7 @@ method save(:$force) {
 
 method shape {
     # shows: num rows, num cols
-    @!cell.elems, @!field.elems
+    self.rows, self.cols
 }
 
 multi method rowcol($r, $c) {

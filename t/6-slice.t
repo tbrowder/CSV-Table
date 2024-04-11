@@ -10,6 +10,11 @@ isa-ok $t, CSV::Table;
 my @arr;
 @arr = $t.slice(0..0, 0..0);
 is @arr[0][0], '00';
+# test calling aliases
+@arr = $t.slice2d(0..0, 0..0);
+is @arr[0][0], '00';
+@arr = $t.view(0..0, 0..0);
+is @arr[0][0], '00';
 
 @arr = $t.slice(0..1, 0..1);
 is @arr[0][0], '00';

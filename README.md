@@ -200,6 +200,13 @@ The table's data cells can also be accessed by field name and row number:
 
     $t.col{$field-name}{$row-number}
 
+CREDITS
+=======
+
+Thanks to @lizmat and @[Coke] for pushing for a more robust CSV handling module including quotes and newlines. 
+
+Thanks to @librasteve for the idea of the `slice` method and his suggestion of aliases `slice2d` and `view` for `slice`.
+
 AUTHOR
 ======
 

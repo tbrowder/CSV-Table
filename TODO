@@ -1,17 +1,36 @@
-+ add constructor args for .slice methods
++ tweak docs
+  - mention .shape
 
-+ add YAMLish config file
-  fornuser defaults
-
-+ use Git::Blame::File to save data
-
-+ numbers should remain numbers if not in quotes
-  (see allomorph handling in docs)
+  - mention no sepchar in first line for 'auto' method
+    defaults to comma
+  - mention aliases for slice:
+        slice2d
+        view
 
 + save the comment lines so they can be reinserted
   - enable modifying a cell
   - use a number scheme to save mod versions
     (maybe in a hidden directory)
+
++ add YAMLish config file
+  for user defaults
+
+====================
+=== COMPLETE ===
+====================
+
++ add half matrix test
++ add default empty cell tests
++ add constructor args for .slice methods
+
++ numbers should remain numbers if not in quotes
+  (see allomorph handling in docs)
+
+====================
+== WILL NOT DO ===
+====================
+
++ use Git::Blame::File to save data
 
 + consider adding custom operators:
   - [][]
