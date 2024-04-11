@@ -158,7 +158,7 @@ submethod TWEAK() {
 
     }
     else {
-        $nfields = $maxseps;
+        $nfields = $maxseps + 1;
     }
 
     # The $nfields number controls the rest of the data handling depending
@@ -536,7 +536,7 @@ sub process-line(
     else {
         # pad to max ncols
         while $o.arr.elems < $nfields {
-            $o.arr.push: "";
+            $o.arr.push: $empty-cell-value;
         }
     }
 
@@ -546,7 +546,6 @@ sub process-line(
 } # sub process-line
 
 sub get-sepchar($header, :$debug) {
-
     my %c;
     # count currently known chars [,;|\t]
     CHAR: for $header.comb -> $c {
@@ -568,6 +567,8 @@ sub get-sepchar($header, :$debug) {
         }
     }
     # the most used sepchar
-    $C
+    # if $C is empty, assume sepchar is ',' (comma)
+    $C = $C ~~ /\S/ ?? $C !! ',';;
+    
 
 } # sub get-sepchar
