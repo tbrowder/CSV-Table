@@ -1,3 +1,7 @@
++ add or delete cells and fields
+
++ matrix operations (separate module)
+
 + tweak docs
   - mention .shape
 
