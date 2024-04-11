@@ -1,3 +1,8 @@
++ add constructor args for .slice methods
+
++ add YAMLish config file
+  fornuser defaults
+
 + use Git::Blame::File to save data
 
 + numbers should remain numbers if not in quotes
@@ -10,6 +15,7 @@
 
 + consider adding custom operators:
   - [][]
+  - [;] # for a slice method (oper not needed)
 
 + from #raku, Voldenet, 2024-04-02T08:54
 
@@ -30,4 +36,4 @@
   } 
   my $a = []; $a[[1,2]].say
 
-  # interesting, but nothing I see that's useful
+  # interesting, use a variant for a .slice method

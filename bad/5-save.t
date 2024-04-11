@@ -15,8 +15,8 @@ Sally   Jean,21 # she really is        < line  1, comment
 is $csv.IO.r, True;
 
 my $t = CSV::Table.new: :$csv;
-say dd $t.comment;
-exit;
+#say dd $t.comment;
+#exit;
 is $t.comment<-1>.trailing.head, "# a commented CSV file";
 
 is $t.field.elems, 2, "field elems 2";

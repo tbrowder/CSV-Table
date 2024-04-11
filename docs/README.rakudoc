@@ -83,7 +83,8 @@ It can handle the following which other CSV handlers may not:
 
 =item With a header line
 =item2 normalizing field names
-=item2 data lines with fewer fields than a header (missing values assumed to be "")
+=item2 data lines with fewer fields than a header (missing values assumed to be ""
+       or the user can choose the default value)
 =item2 data lines with more fields than its header (fatal, but reported)
 
 Note header lines with any empty fields causes an exception. This is a valid
@@ -101,9 +102,16 @@ field0, field1, field2,
 
 =item Without a header line
 =item2 data lines are padded with empty fields to the maximum number of fields
-found in the file
+found in the file (or the user's chosen value)
 
 As simple as it is, it also has some uncommon features that are very useful:
+
+=begin item
+Its C<slice> method enables extraction of an M'xN' sub-array of the data cells
+
+The C<slice> arguments are two range values defining the rows and columns
+zero-indexed cell indices of the desired sub-array.
+=end item
 
 =begin item
 Comment lines are allowed

@@ -5,13 +5,14 @@ use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 has $.csv is required;
 
 # options
-has $.separator    = 'auto'; # auto, comma, pipe, semicolon, tab
-has $.trim         = True;
-has $.normalize    = True;
-has $.comment-char = '#';
-has $.has-header   = True;
-has $.line-ending  = "\n";
-has $.raw-ending   = "-raw";
+has $.separator        = 'auto'; # auto, comma, pipe, semicolon, tab
+has $.trim             = True;
+has $.normalize        = True;
+has $.comment-char     = '#';
+has $.has-header       = True;
+has $.line-ending      = "\n";
+has $.raw-ending       = "-raw";
+has $.empty-cell-value = "";
 has $.raw-csv;
 
 # data
@@ -78,7 +79,6 @@ submethod TWEAK() {
         if $line.contains($!comment-char) {
             $lead = "{$!comment-char} ";
         }
-
 
         ($line, $comment) = strip-comment $line, :save-comment;
         # Comment lines:
@@ -201,6 +201,42 @@ submethod TWEAK() {
     }
 }
 
+method slice(Range $rows, Range $cols --> Array) {
+    my $upper-row = $rows.head;
+    my $lower-row = $rows.tail;
+    my $left-col  = $cols.head;
+    my $right-col = $cols.tail;
+    my $err = 0;
+    # report out of bounds
+    if $upper-row < 0 {
+        ++$err;
+    }
+    elsif $left-col < 0 {
+        ++$err;
+    }
+    elsif $lower-row > self.rows - 1 {
+        ++$err;
+    }
+    elsif $right-col > self.cols - 1 {
+        ++$err;
+    }
+
+    if $err {
+        my $s = $err > 1 ?? "s" !! "";
+        die "FATAL: Method .slice exceeded $err array bound$s."
+    }
+
+    my @arr;
+    for $upper-row .. $lower-row -> $i {
+        my @cells;
+        for $left-col .. $right-col -> $j {
+            @cells.push: @!cell[$i][$j];
+        }
+        @arr.push: @cells;
+    }
+    @arr
+} 
+
 method save(:$force) {
 
     my $f  = $!raw-csv;
@@ -260,6 +296,11 @@ method save(:$force) {
             }
         }
     }
+}
+
+method shape {
+    # shows: num rows, num cols
+    @!cell.elems, @!field.elems
 }
 
 multi method rowcol($r, $c) {
@@ -522,4 +563,5 @@ sub get-sepchar($header, :$debug) {
     }
     # the most used sepchar
     $C
-}
+
+} # sub get-sepchar
