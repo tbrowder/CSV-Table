@@ -1,0 +1,10 @@
+{
+"separator":        "auto",
+"trim":             "True",
+"normalize":        "True",
+"comment-char":     "#",
+"has-header":       "True",
+"line-ending":      "\n",
+"raw-ending":       "-raw",
+"empty-cell-value": ""
+}

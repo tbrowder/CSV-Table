@@ -1,8 +1,9 @@
 unit class CSV::Table;
 
+use JSON::Fast;
 use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 
-has $.csv is required;
+has $.csv; #is required;
 
 # options
 has $.separator        = 'auto'; # auto, comma, pipe, semicolon, tab
@@ -48,12 +49,46 @@ submethod TWEAK() {
 
     my $debug = 0;
 
-    die "FATAL: File '$!csv' not found" unless $!csv.IO.r;
+    #die "FATAL: File '$!csv' not found" unless $!csv.IO.r;
 
     # Read any config file
     if $!config.defined and $!config.IO.r {
         # expected to be named .yml or .yaml
         # but read anyway 
+        my $jstr = slurp $!config;
+        my %h = from-json $jstr;
+        # fill in new values
+        for %h.kv -> $k, $v {
+            with $k {
+                when /separator/ { 
+                    $!separator = $v 
+                } #  = 'auto'; # auto, comma, pipe, semicolon, tab
+                when /trim/ { 
+                    $!trim = $v 
+                } # = True;
+                when /normalize/ { 
+                    $!normalize = $v 
+                } #  = True;
+                when /comment\-char/ { 
+                    $!comment-char = $v 
+                } #  = '#';
+                when /has\-header/ { 
+                    $!has-header = $v 
+                } #  = True;
+                when /line\-ending/ { 
+                    $!line-ending = $v 
+                } #  = "\n";
+                when /raw\-ending/ { 
+                     $!raw-ending = $v 
+                } #  = "-raw";
+                when /empty\-cell\-value/ { 
+                    $!empty-cell-value = $v 
+                } # = "";
+            }
+        }
+    }
+    if not $!csv.defined {
+        return;
     }
 
     # The input file is $!csv; save its contents
@@ -692,7 +727,33 @@ sub get-sepchar($header, :$debug) {
 
 } # sub get-sepchar
 
-method write-config {
-    say "config"
+method write-config($f? is copy, :$force) {
+    my $s = qq:to/HERE/;
+    separator:        auto # auto, comma, pipe, semicolon, tab
+    trim:             True
+    normalize:        True
+    comment-char:     \#
+    has-header:       True
+    line-ending:      \\n
+    raw-ending:       -raw
+    empty-cell-value: "";
+    HERE
+
+    unless $f.defined {
+        $f = "config-csv-table.yml";
+    }
+    if $f.IO.r {
+        if $force.defined {
+            $f.IO.spurt: $s;
+        }
+        else {
+            say "File $f exists. Use the $force option to over-write it.";
+            return;
+        }
+    }
+    else {
+        $f.IO.spurt: $s;
+    }
+    say "See CSV::Table YAML configuration file '$f'";
 }
 

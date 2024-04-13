@@ -205,14 +205,16 @@ option. The user may get a prefilled config file by executing:
 
 =begin code
 $ raku -e'use CSV::Table; CSV::Table.write-config'
-See CSV::Table YAML configuraion file 'config-csv-table.yml'
+See CSV::Table YAML configuration file 'config-csv-table.yml'
 =end code
 
-Alternatively:
+Alternatively, you can call the method on a CSV::Table object in the REPL:
 
 =begin code
-my $t$ raku -e'use CSV::Table; CSV::Table.write-config'
-See CSV::Table YAML configuraion file 'config-csv-table.yml'
+$ raku
+> use CSV::Table;
+> CSV::Table.write-config
+See CSV::Table YAML configuration file 'config-csv-table.yml'
 =end code
 
 
