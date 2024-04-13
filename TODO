@@ -1,4 +1,4 @@
-+ add or delete cells and fields
++ have adding or deleting cells and fields
   trip autosave
 
 + matrix operations (separate module)
@@ -19,6 +19,8 @@
 
 + add YAMLish config file
   for user defaults
+  - in $HOME/*
+  - in a named file in the constructor
 
 ====================
 === COMPLETE ===

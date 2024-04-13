@@ -61,8 +61,13 @@ the corresponding field names in the data hashes, you will most likely
 have problems.  It would be much easier to modify the original CSV
 file.
 
-You can choose to save the changed data (C<$t.save>), any time, but
+You can choose to save the changed data (C<$t.save>) any time, but
 you will be asked to confirm the save.
+
+You can also save the data in a new file: C<$t.save-as: $stem>. Where
+C<$stem> is the desired basename without a suffix. The new files 
+will have the '.csv' and '-raw.csv' names (or your desired 'raw' file
+string).
 
 =head1 DESCRIPTION
 
@@ -81,7 +86,7 @@ It can handle the following which other CSV handlers may not:
 =item With a header line
 =item2 normalizing field names
 =item2 data lines with fewer fields than a header (missing values assumed to be ""
-       or the user can choose the default value)
+       or the user can choose the default value in the constructor)
 =item2 data lines with more fields than its header (fatal, but reported)
 
 Note header lines with any empty fields causes an exception. This is a valid
@@ -133,10 +138,15 @@ Note comments are preserved and restored when the CSV file is saved.
 =end item
 
 =begin item
+Save, Save as
+
 There is a C<save> method which saves the current state of the CSV file
 (including comments) as well as saving a "raw" CSV file without the
 comments so the file can be used with conventional CSV handlers such as
 LibreOffice or Excel.
+
+There is also a C<save-as> method to change the names of the output
+files.
 =end item
 
 =begin item
@@ -178,7 +188,9 @@ my $t = CSV::Table.new: :$csv,
                         :normalize=True,
                         :trim=True,
                         :comment-char='#',
-                        :line-ending="\n"
+                        :line-ending="\n",
+                        :empty-cell-value="",
+                        :config
                         ;
 =end code
 
@@ -186,6 +198,23 @@ Following are the allowable values for the named arguments. The user
 is cautioned that unspecified values are probably not tested. File an
 issue if your value of choice is not specified and it can be added
 and tested for.
+
+There are a lot of options, one or all of which can be defined in
+a YAML configuration file whose path is provided by the C<config>
+option. The user may get a prefilled config file by executing:
+
+=begin code
+$ raku -e'use CSV::Table; CSV::Table.write-config'
+See CSV::Table YAML configuraion file 'config-csv-table.yml'
+=end code
+
+Alternatively:
+
+=begin code
+my $t$ raku -e'use CSV::Table; CSV::Table.write-config'
+See CSV::Table YAML configuraion file 'config-csv-table.yml'
+=end code
+
 
 =item C<:$separator>
 =item2 auto [default]
@@ -214,6 +243,10 @@ and tested for.
 =item2 C<"\n"> [default]
 =item2 C<String>
 
+=item C<:$emmpty-cell-value>
+=item2 C<''> [default]
+=item2 C<String>
+
 =head2 Accessing the table
 
 The following table shows how to access each cell in a table C<$t>
@@ -232,6 +265,20 @@ The table's data cells can also be accessed by field name and row number:
 =begin code
 $t.col{$field-name}{$row-number}
 =end code
+
+=head1 Possible new features
+
+The following features can be implemented fairly easily if users
+want it and file an issue. 
+
+=item add row names
+=item add new rows or columns
+=item delete rows or columns
+=item row sum and average 
+=item column sum and average 
+
+Other matrix-related features could be implemented, but most are
+available in the published modules C<Math::Libgsl::Matrix> and C<Math::Matrix>.
 
 =head1 CREDITS
 

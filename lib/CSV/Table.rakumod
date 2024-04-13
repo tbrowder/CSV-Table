@@ -13,6 +13,9 @@ has $.has-header       = True;
 has $.line-ending      = "\n";
 has $.raw-ending       = "-raw";
 has $.empty-cell-value = "";
+has $.config;
+# end options
+
 has $.raw-csv;
 
 # data
@@ -24,7 +27,7 @@ has @.cell;  # array of arrays of row cells (aka "row")
 has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
-has %.comment; # @lines index number => Comment
+has %.comment; # @lines index number (includes any header) => Comment
 
 # other
 has @.col-width; # max col width in number of characters (.chars)
@@ -46,6 +49,12 @@ submethod TWEAK() {
     my $debug = 0;
 
     die "FATAL: File '$!csv' not found" unless $!csv.IO.r;
+
+    # Read any config file
+    if $!config.defined and $!config.IO.r {
+        # expected to be named .yml or .yaml
+        # but read anyway 
+    }
 
     # The input file is $!csv; save its contents
     # without comments as "{$!csv.basename}-raw.csv"
@@ -246,33 +255,48 @@ method slice(Range $rows, Range $cols --> Array) {
     @arr
 } 
 
-method save(:$force) {
+method save-as($stem is copy, :$force) {
+    # strip off any .csv
+    $stem ~~ s/:i '.' csv $//;
+}
+ 
+method save(:$force, :$stem) {
+    # defining $stem is a file rename
+    my ($csv, $raw);
+    if $stem {
+        $csv = $stem ~ '.csv';
+        $raw = $stem ~ $.raw-ending ~ '.csv';
+    }
+    else {
+        # default
+        $csv  = $!csv;
+        $raw  = $!raw-csv;
+    }
 
-    my $f  = $!raw-csv;
-    my $f2 = $!csv;
+
     my $wraw = $force ?? True !! False;
     my $wcsv = $force ?? True !! False;
 
-    if not $force and $!raw-csv.IO.e {
-        say "File '$f' exists.";
-        my $res = prompt "Overwrite file '$f'? (Y/n) ";
+    if not $force and $raw.IO.e {
+        say "File '$raw' exists.";
+        my $res = prompt "Overwrite file '$raw'? (Y/n) ";
         if $res ~~ /:i y/ {
             $wraw = True;
-            say "Overwriting file '$f'...";
+            say "Overwriting file '$raw'...";
         }
         else {
-            say "File '$f' was not overwritten.";
+            say "File '$raw' was not overwritten.";
         }
     }
-    if not $force and $!csv.IO.e {
-        say "File '$f2' exists.";
-        my $res = prompt "Overwrite file '$f2'? (Y/n) ";
+    if not $force and $csv.IO.e {
+        say "File '$csv' exists.";
+        my $res = prompt "Overwrite file '$csv'? (Y/n) ";
         if $res ~~ /:i y/ {
             $wcsv = True;
-            say "Overwriting file '$f2'...";
+            say "Overwriting file '$csv'...";
         }
         else {
-            say "File '$f2' was not overwritten.";
+            say "File '$csv' was not overwritten.";
         }
     }
 
@@ -305,10 +329,98 @@ method save(:$force) {
             }
         }
     }
+
+    =begin comment
+    class Comment {
+        has $.inline   = 0;  # inline after the comment char
+        has @.trailing = []; # one or more comment-only lines
+    }
+    has %.comment; # @lines index number (includes any header) => Comment
+    =end comment
+
+    if $wcsv {
+        # Add back the stripped comments
+        my $fh = open $!raw-csv, :w, :nl-out($!line-ending);
+        # Use proper sepchar, respect max col width # with sprintf
+        my $ne = @!col-width.elems;
+
+        my $lnum = -1;
+        my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
+        # print any leading comments
+        if $c {
+            # sanity check
+            die "FATAL: Unexpected error: please file an issue" if $c.inline;
+            for $c.trailing {
+                $fh.say: $_;
+            }
+        }
+
+        if $!has-header {
+
+            ++$lnum;
+            my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
+
+            for @!field.kv -> $i, $v {
+                my $w = @!col-width[$i];
+                my $s = sprintf "%*.*s", $w, $w, $v;
+                if $i < $ne-1 {
+                    $fh.print: $s;
+                    $fh.print: $!separator;
+                }
+                else {
+                    # print the last field plus any inline comment
+                    if $c and $c.inline {
+                        $fh.print: $s;
+                        $fh.say:   $c.inline;
+                    }
+                    else {
+                        $fh.say: $s;
+                    }
+                }
+            }
+            # print any trailing comments
+            if $c and $c.trailing.elems {
+                for $c.trailing {
+                    $fh.say: $_;
+                }
+            }
+        }
+        for @!cell.kv -> $i, $v {
+
+            ++$lnum;
+            my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
+
+            my $w = @!col-width[$i];
+            my $s = sprintf "%*.*s", $w, $w, $v;
+            if $i < $ne-1 {
+                $fh.print: $s;
+                $fh.print: $!separator;
+            }
+            else {
+                # print the last field plus any inline comment
+                if $c and $c.inline {
+                    $fh.print: $s;
+                    $fh.say:   $c.inline;
+                }
+                else {
+                    $fh.say: $s;
+                }
+            }
+            # print any trailing comments
+            if $c and $c.trailing.elems {
+                for $c.trailing {
+                    $fh.say: $_;
+                }
+            }
+        }
+    }
 }
 
-method shape {
+method shape(:$show) {
     # shows: num rows, num cols
+    if $show {
+        return "{self.rows}x{self.cols}"
+    }
     self.rows, self.cols
 }
 
@@ -577,6 +689,10 @@ sub get-sepchar($header, :$debug) {
     # the most used sepchar
     # if $C is empty, assume sepchar is ',' (comma)
     $C = $C ~~ /\S/ ?? $C !! ',';;
-    
 
 } # sub get-sepchar
+
+method write-config {
+    say "config"
+}
+

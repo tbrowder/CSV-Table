@@ -58,7 +58,9 @@ $t.rowcol(0, 1, 50);
 
 You can also change the names of fields, but, unless you also change the corresponding field names in the data hashes, you will most likely have problems. It would be much easier to modify the original CSV file.
 
-You can choose to save the changed data (`$t.save`), any time, but you will be asked to confirm the save.
+You can choose to save the changed data (`$t.save`) any time, but you will be asked to confirm the save.
+
+You can also save the data in a new file: `$t.save-as: $stem`. Where `$stem` is the desired basename without a suffix. The new files will have the '.csv' and '-raw.csv' names (or your desired 'raw' file string).
 
 DESCRIPTION
 ===========
@@ -75,7 +77,7 @@ It can handle the following which other CSV handlers may not:
 
     * normalizing field names
 
-    * data lines with fewer fields than a header (missing values assumed to be "" or the user can choose the default value)
+    * data lines with fewer fields than a header (missing values assumed to be "" or the user can choose the default value in the constructor)
 
     * data lines with more fields than its header (fatal, but reported)
 
@@ -108,7 +110,11 @@ As simple as it is, it also has some uncommon features that are very useful:
 
     Note comments are preserved and restored when the CSV file is saved.
 
-  * There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
+  * Save, Save as
+
+    There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
+
+    There is also a `save-as` method to change the names of the output files.
 
   * Text normalization
 
@@ -140,10 +146,14 @@ Constructor with default options
                             :normalize=True,
                             :trim=True,
                             :comment-char='#',
-                            :line-ending="\n"
+                            :line-ending="\n",
+                            :empty-cell-value="",
+                            :config
                             ;
 
 Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified and it can be added and tested for.
+
+There are a lot of options, one or all of which can be defined in a YAML configuration file whose path is provided by the `config` option. The user may get a prefilled config file by executing: `CSV::Table.write-config`
 
   * `:$separator`
 
@@ -187,6 +197,12 @@ Following are the allowable values for the named arguments. The user is cautione
 
     * `String`
 
+  * `:$emmpty-cell-value`
+
+    * `''` [default]
+
+    * `String`
+
 Accessing the table
 -------------------
 
@@ -201,6 +217,23 @@ The following table shows how to access each cell in a table `$t` with a header 
 The table's data cells can also be accessed by field name and row number:
 
     $t.col{$field-name}{$row-number}
+
+Possible new features
+=====================
+
+The following features can be implemented fairly easily if users want it and file an issue. 
+
+  * add row names
+
+  * add new rows or columns
+
+  * delete rows or columns
+
+  * row sum and average 
+
+  * column sum and average 
+
+Other matrix-related features could be implemented, but most are available in the published modules `Math::Libgsl::Matrix` and `Math::Matrix`.
 
 CREDITS
 =======
