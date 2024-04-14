@@ -43,13 +43,17 @@ is $t.cell[0][1], 50;
 # test the hashes
 is $t.col<weight>[0], 103;
 
-# possible
+# possible hot changes
 $t.field[0] = "Name";
 is $t.field[0], "Name";
 
 # but that change HAS NOT changed the hash keys
 # TODO make suitable test
 isnt $t.col<Name>[0], 103;
+
+# change sepchar
+$t.separator = "|";
+is $t.separator, "|", "change sepchar";;
 
 done-testing;
 

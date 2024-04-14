@@ -6,15 +6,17 @@ use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 has $.csv; #is required;
 
 # options
-has $.separator        = 'auto'; # auto, comma, pipe, semicolon, tab
+has $.separator is rw  = 'auto'; # auto, comma, pipe, semicolon, tab
 has $.trim             = True;
 has $.normalize        = True;
 has $.comment-char     = '#';
 has $.has-header       = True;
 has $.line-ending      = "\n";
-has $.raw-ending       = "-raw";
+has $.raw-ending is rw = "-raw";
 has $.empty-cell-value = "";
-has $.config;
+has $.has-row-names    = False;
+
+has $.config; # empty unless using it; if used, contents takes precedence
 # end options
 
 has $.raw-csv;
@@ -23,11 +25,17 @@ has $.raw-csv;
 # arrays
 has @.field; # array of field names (or 0..N-1 if no header)
 has @.cell;  # array of arrays of row cells (aka "row")
+has @.rnam;  # array of row names, if $has-row-names
 
 # hashes
 has %.col;     # field name => @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
+
+has %.row;     # row name => @cols
+has %.rownum;  # row name => row number
+has %.rowname; # row number => row name
+
 has %.comment; # @lines index number (includes any header) => Comment
 
 # other

@@ -9,13 +9,15 @@ my $csv  = 't/data/commented.csv';
 my $csv1 = 't/data/expected/commented-raw.csv';
 #   no comments, columns aligned by max field width
 my $csv2 = 't/data/expected/commented-raw2.csv';
+#   no comments, columns aligned by max field width, change sepchar to pipe
+my $csv3 = 't/data/expected/commented-raw3.csv';
 
 #   comments per original spacing, cell separation by a single space
-my $csv3 = 't/data/expected/commented3.csv';
+my $csv4 = 't/data/expected/commented3.csv';
 #   comments per original spacing, cells aligned by max field width 
-my $csv4 = 't/data/expected/commented4.csv';
+my $csv5 = 't/data/expected/commented4.csv';
 #   comments normalized, cells aligned by max field width 
-my $csv5 = 't/data/expected/commented5.csv';
+my $csv6 = 't/data/expected/commented5.csv';
 
 #END { unlink $csvt }
 
