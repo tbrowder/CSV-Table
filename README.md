@@ -137,6 +137,8 @@ It cannot currently handle:
 
   * duplicate field names in a header line
 
+  * duplicate row names
+
 Constructor with default options
 --------------------------------
 
@@ -148,22 +150,24 @@ Constructor with default options
                             :comment-char='#',
                             :line-ending="\n",
                             :empty-cell-value="",
+                            :has-row-names=False,
+                            :raw-ending="-raw",
                             :config
                             ;
 
 Following are the allowable values for the named arguments. The user is cautioned that unspecified values are probably not tested. File an issue if your value of choice is not specified and it can be added and tested for.
 
-There are a lot of options, one or all of which can be defined in a YAML configuration file whose path is provided by the `config` option. The user may get a prefilled config file by executing:
+There are a lot of options, one or all of which can be defined in a JSON configuration file whose path is provided by the `config` option. The user may get a prefilled config file by executing:
 
     $ raku -e'use CSV::Table; CSV::Table.write-config'
-    See CSV::Table YAML configuration file 'config-csv-table.yml'
+    See CSV::Table JSON configuration file 'config-csv-table.json'
 
 Alternatively, you can call the method on a CSV::Table object in the REPL:
 
     $ raku
     > use CSV::Table;
     > CSV::Table.write-config
-    See CSV::Table YAML configuration file 'config-csv-table.yml'
+    See CSV::Table JSON configuration file 'config-csv-table.json'
 
   * `:$separator`
 

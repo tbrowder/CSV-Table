@@ -5,7 +5,7 @@ use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 
 has $.csv; #is required;
 
-# options
+# 10 options
 has $.separator is rw  = 'auto'; # auto, comma, pipe, semicolon, tab
 has $.trim             = True;
 has $.normalize        = True;
@@ -15,26 +15,27 @@ has $.line-ending      = "\n";
 has $.raw-ending is rw = "-raw";
 has $.empty-cell-value = "";
 has $.has-row-names    = False;
-
-has $.config; # empty unless using it; if used, contents takes precedence
+has $.config; # JSON file name; empty unless using it; 
+              # if used, contents take precedence over
+              # other entries
 # end options
-
+has $.ulname; # "corner" cell contents when header and row names are used
 has $.raw-csv;
 
 # data
 # arrays
-has @.field; # array of field names (or 0..N-1 if no header)
-has @.cell;  # array of arrays of row cells (aka "row")
-has @.rnam;  # array of row names, if $has-row-names
+has @.field;   # array of field names (or 0..N-1 if no header)
+has @.cell;    # array of arrays of row cells (aka "row"); data
+has @.rowname; # array of row names, if $has-row-names
 
 # hashes
-has %.col;     # field name => @rows
+has %.col;     # field name => slice of that col from @rows
 has %.colnum;  # field name => col number
 has %.colname; # col number => field name
 
-has %.row;     # row name => @cols
-has %.rownum;  # row name => row number
-has %.rowname; # row number => row name
+has %.row;     # row name   => an element of @rows
+has %.rownum;  # row name   => row number
+has %.rowtag;  # row number => row name
 
 has %.comment; # @lines index number (includes any header) => Comment
 
@@ -49,53 +50,42 @@ class Comment {
 
 class Line {
     # holds the data from processing a header or data line
-    has @.arr is rw;
-    has @.col-width is rw;
+    has $.rname is rw; # if $!has-row-names
+    has $.rwid  is rw; # if $!has-row-names
+
+    has @.arr is rw;       # does NOT include the row name cell
+    has @.col-width is rw; # does NOT include row name cell
 }
 
 submethod TWEAK() {
-
     my $debug = 0;
-
-    #die "FATAL: File '$!csv' not found" unless $!csv.IO.r;
 
     # Read any config file
     if $!config.defined and $!config.IO.r {
-        # expected to be named .yml or .yaml
+        # expected to be named .json
         # but read anyway 
         my $jstr = slurp $!config;
         my %h = from-json $jstr;
         # fill in new values
         for %h.kv -> $k, $v {
             with $k {
-                when /separator/ { 
-                    $!separator = $v 
-                } #  = 'auto'; # auto, comma, pipe, semicolon, tab
-                when /trim/ { 
-                    $!trim = $v 
-                } # = True;
-                when /normalize/ { 
-                    $!normalize = $v 
-                } #  = True;
-                when /comment\-char/ { 
-                    $!comment-char = $v 
-                } #  = '#';
-                when /has\-header/ { 
-                    $!has-header = $v 
-                } #  = True;
-                when /line\-ending/ { 
-                    $!line-ending = $v 
-                } #  = "\n";
-                when /raw\-ending/ { 
-                     $!raw-ending = $v 
-                } #  = "-raw";
-                when /empty\-cell\-value/ { 
-                    $!empty-cell-value = $v 
-                } # = "";
+                when /separator/          { $!separator        = $v } 
+                  #  = 'auto'; # auto, comma, pipe, semicolon, tab
+                when /trim/               { $!trim             = $v } # = True;
+                when /normalize/          { $!normalize        = $v } # = True;
+                when /comment\-char/      { $!comment-char     = $v } # = '#';
+                when /has\-header/        { $!has-header       = $v } # = True;
+                when /line\-ending/       { $!line-ending      = $v } # = "\n";
+                when /raw\-ending/        { $!raw-ending       = $v } # = "-raw";
+                when /empty\-cell\-value/ { $!empty-cell-value = $v } # = "";
+                when /has\-row\-names/    { $!has-row-names    = $v } # = "";
+                # config not expected, but
+                when /config/             { ; }
             }
         }
     }
     if not $!csv.defined {
+        # allow the method write-config to be called without an object
         return;
     }
 
@@ -123,14 +113,6 @@ submethod TWEAK() {
     LINE: for $fh.lines -> $line is copy {
         note "DEBUG: line = $line" if $debug;
         my $comment;
-
-        # TODO may not need this if I modify Text::Utils to retain the whole string
-        # count first comment char TODO
-        # a var to hold a string to mark saved comment text
-        my $lead = "";
-        if $line.contains($!comment-char) {
-            $lead = "{$!comment-char} ";
-        }
 
         ($line, $comment) = strip-comment $line, :save-comment;
         # Comment lines:
@@ -185,8 +167,10 @@ submethod TWEAK() {
     my $ncols   = 0;
     my $row; # holds a Line object
     if $!has-header {
+        # TODO handle row names
         $header = @lines.shift;
         $row = process-header $header, :separator($!separator),
+                              :has-row-names($!has-row-names),
                               :normalize($!normalize), :trim($!trim);
         # fields are cleaned, trailing empty cells are removed
         #   (but reported) and column widths are initialized
@@ -229,6 +213,7 @@ submethod TWEAK() {
     # the rest of the data lines
     for @lines.kv -> $line-num, $line {
         $row = process-line $line, :separator($!separator), :$line-num,
+                                   :has-row-names($!has-row-names),
                                    :has-header($!has-header), :$nfields,
                                    :empty-cell-value($!empty-cell-value),
                                    :normalize($!normalize), :trim($!trim);
@@ -518,6 +503,7 @@ sub process-header(
     :$normalize!,
     :$trim!,
     :$debug,
+    :$has-row-names!,
     #--> Line
 ) {
     my @arr = $header.split(/$separator/);
@@ -646,6 +632,7 @@ sub process-line(
     :$has-header!, # is this needed here? YES
     :$nfields!,
     :$normalize!,
+    :$has-row-names!,
     :$empty-cell-value!,
     :$trim!,
     :$debug,

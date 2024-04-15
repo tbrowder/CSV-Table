@@ -178,6 +178,7 @@ It cannot currently handle:
 =item backslashes
 =item binary data
 =item duplicate field names in a header line
+=item duplicate row names
 
 =head2 Constructor with default options
 
@@ -190,6 +191,8 @@ my $t = CSV::Table.new: :$csv,
                         :comment-char='#',
                         :line-ending="\n",
                         :empty-cell-value="",
+                        :has-row-names=False,
+                        :raw-ending="-raw",
                         :config
                         ;
 =end code
@@ -200,12 +203,12 @@ issue if your value of choice is not specified and it can be added
 and tested for.
 
 There are a lot of options, one or all of which can be defined in
-a YAML configuration file whose path is provided by the C<config>
+a JSON configuration file whose path is provided by the C<config>
 option. The user may get a prefilled config file by executing:
 
 =begin code
 $ raku -e'use CSV::Table; CSV::Table.write-config'
-See CSV::Table YAML configuration file 'config-csv-table.yml'
+See CSV::Table JSON configuration file 'config-csv-table.json'
 =end code
 
 Alternatively, you can call the method on a CSV::Table object in the REPL:
@@ -214,9 +217,8 @@ Alternatively, you can call the method on a CSV::Table object in the REPL:
 $ raku
 > use CSV::Table;
 > CSV::Table.write-config
-See CSV::Table YAML configuration file 'config-csv-table.yml'
+See CSV::Table JSON configuration file 'config-csv-table.json'
 =end code
-
 
 =item C<:$separator>
 =item2 auto [default]

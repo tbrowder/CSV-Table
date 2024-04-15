@@ -1,5 +1,4 @@
 #!/usr/bin/env raku
-
 use lib ".";
 
 class F {
