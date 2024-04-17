@@ -6,5 +6,6 @@
 "has-header":       "True",
 "line-ending":      "\n",
 "raw-ending":       "-raw",
-"empty-cell-value": ""
+"empty-cell-value": "",
+"has-row-names":    "False"
 }

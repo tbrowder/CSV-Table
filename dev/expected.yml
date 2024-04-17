@@ -6,3 +6,4 @@ has-header:       True
 line-ending:      \n
 raw-ending:       -raw
 empty-cell-value: ""
+has-row-names:    False
