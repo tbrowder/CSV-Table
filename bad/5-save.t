@@ -16,6 +16,8 @@ my $csv3 = 't/data/expected/commented-raw3.csv';
 my $csv4 = 't/data/expected/commented3.csv';
 #   comments per original spacing, cells aligned by max field width 
 my $csv5 = 't/data/expected/commented4.csv';
+
+# for future use with normalized comments
 #   comments normalized, cells aligned by max field width 
 my $csv6 = 't/data/expected/commented5.csv';
 
@@ -52,6 +54,8 @@ $t.save: :force;
 
 my $s1 = slurp $csv;
 my $s2 = slurp $csv2;
+
+# test all comment combos
 
 done-testing;
 

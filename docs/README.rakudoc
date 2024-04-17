@@ -61,7 +61,7 @@ the corresponding field names in the data hashes, you will most likely
 have problems.  It would be much easier to modify the original CSV
 file.
 
-You can choose to save the changed data (C<$t.save>) any time, but
+You can choose to ave the changed data (C<$t.save>) any time, but
 you will be asked to confirm the save.
 
 You can also save the data in a new file: C<$t.save-as: $stem>. Where
@@ -280,6 +280,7 @@ want it and file an issue.
 =item delete rows or columns
 =item row sum and average 
 =item column sum and average 
+=item normalize comments
 
 Other matrix-related features could be implemented, but most are
 available in the published modules C<Math::Libgsl::Matrix> and C<Math::Matrix>.
