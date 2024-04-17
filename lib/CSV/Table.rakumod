@@ -722,8 +722,14 @@ sub get-sepchar($header, :$debug) {
 
 } # sub get-sepchar
 
-method write-config($f? is copy, :$force) {
-    my $s = qq:to/HERE/;
+method write-config(
+    $f? is copy, 
+    :$yaml, 
+    :$json, 
+    :$force
+) {
+
+    my $yaml = q:to/HERE/;
     separator:        auto # auto, comma, pipe, semicolon, tab
     trim:             True
     normalize:        True
@@ -732,6 +738,9 @@ method write-config($f? is copy, :$force) {
     line-ending:      \\n
     raw-ending:       -raw
     empty-cell-value: "";
+    HERE
+
+    my $json = q:to/HERE/;
     HERE
 
     unless $f.defined {
