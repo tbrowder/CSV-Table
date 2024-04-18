@@ -723,12 +723,16 @@ sub get-sepchar($header, :$debug) {
 } # sub get-sepchar
 
 method write-config(
-    $f? is copy, 
-    :$yaml, 
-    :$json, 
+    $f? is copy, # the suffix must be one of: .json, .yml, or .yaml
+    :$type is copy where {/:i <[yaml]> | <[json]>/ }, 
     :$force
 ) {
 
+    # the default config file type is YAML
+    my $ftype = "YAML";
+    my $fsuff = ".yml";
+
+    # the default strings:
     my $yaml = q:to/HERE/;
     separator:        auto # auto, comma, pipe, semicolon, tab
     trim:             True
@@ -738,17 +742,71 @@ method write-config(
     line-ending:      \\n
     raw-ending:       -raw
     empty-cell-value: "";
+    has-row-names:    False
     HERE
 
     my $json = q:to/HERE/;
+    {
+    "separator":        "auto",
+    "trim":             "True",
+    "normalize":        "True",
+    "comment-char":     "#",
+    "has-header":       "True",
+    "line-ending":      "\n",
+    "raw-ending":       "-raw",
+    "empty-cell-value": "",
+    "has-row-names":    "False"
+    }
     HERE
 
-    unless $f.defined {
+    my $ostr  = $yaml;
+    my ($wyaml, $wjson);
+
+    with $type {
+        when /:i<[json]>/ {
+            $wjson = $json;
+            $fsuff = "json";
+            $ftype = "JSON";
+            $ostr  = $json;
+        }
+        when /:i<[yaml]>/ {
+            $wyaml = $yaml;
+            $fsuff = "yml";
+            $ftype = "YAML";
+            $ostr  = $yaml;
+        }
+    }
+
+    if $f.defined {
+        if $f ~~ /'.' (\S+) $/ {
+            my $suf = ~$0.lc;
+            if $suf eq "yml" {
+            }
+            elsif $suf eq "yaml" {
+            }
+            elsif $suf eq "json" {
+            }
+            else {
+                die qq:to/HERE/;
+                FATAL: Input config file name is '$f' with unknown suffix of '.$suf'.
+                       The suffix must be one of: .json, .yml, or .yaml";
+                HERE
+            }
+        }
+    }
+    elsif $wjson.defined {
+        $f = "config-csv-table.json";
+    }
+    elsif $wyaml.defined {
         $f = "config-csv-table.yml";
     }
+    else {
+        die "FATAL: Unexpected failure. Please file an issue."
+    }
+
     if $f.IO.r {
         if $force.defined {
-            $f.IO.spurt: $s;
+            $f.IO.spurt: $ostr;
         }
         else {
             say "File $f exists. Use the $force option to over-write it.";
@@ -756,8 +814,8 @@ method write-config(
         }
     }
     else {
-        $f.IO.spurt: $s;
+        $f.IO.spurt: $ostr;
     }
-    say "See CSV::Table YAML configuration file '$f'";
+    say "See CSV::Table $ftype configuration file '$f'";
 }
 

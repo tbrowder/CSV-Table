@@ -58,7 +58,7 @@ $t.rowcol(0, 1, 50);
 
 You can also change the names of fields, but, unless you also change the corresponding field names in the data hashes, you will most likely have problems. It would be much easier to modify the original CSV file.
 
-You can choose to save the changed data (`$t.save`) any time, but you will be asked to confirm the save.
+You can choose to ave the changed data (`$t.save`) any time, but you will be asked to confirm the save.
 
 You can also save the data in a new file: `$t.save-as: $stem`. Where `$stem` is the desired basename without a suffix. The new files will have the '.csv' and '-raw.csv' names (or your desired 'raw' file string).
 
@@ -246,6 +246,8 @@ The following features can be implemented fairly easily if users want it and fil
   * row sum and average 
 
   * column sum and average 
+
+  * normalize comments
 
 Other matrix-related features could be implemented, but most are available in the published modules `Math::Libgsl::Matrix` and `Math::Matrix`.
 
