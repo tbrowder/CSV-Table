@@ -323,12 +323,18 @@ method slice(Range $rows, Range $cols --> Array) {
 method save-as($stem is copy, :$force) {
     # strip off any .csv
     $stem ~~ s/:i '.' csv $//;
+    my ($csv, $raw);
+    $csv = $stem ~ '.csv';
+    $raw = $stem ~ $.raw-ending ~ '.csv';
+
+    my $wraw = $force ?? True !! False;
+    my $wcsv = $force ?? True !! False;
 }
 
 method save(:$force, :$stem) {
     # defining $stem is a file rename
     my ($csv, $raw);
-    if $stem {
+    if $stem.defined {
         $csv = $stem ~ '.csv';
         $raw = $stem ~ $.raw-ending ~ '.csv';
     }
@@ -337,7 +343,6 @@ method save(:$force, :$stem) {
         $csv  = $!csv;
         $raw  = $!raw-csv;
     }
-
 
     my $wraw = $force ?? True !! False;
     my $wcsv = $force ?? True !! False;
