@@ -1,0 +1,11 @@
+{
+"separator":        "\t",
+"trim":             false,
+"normalize":        false,
+"comment-char":     ";",
+"has-header":       false,
+"line-ending":      "||",
+"raw-ending":       "-clean",
+"empty-cell-value": 0,
+"has-row-names":    false
+}

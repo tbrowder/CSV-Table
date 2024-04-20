@@ -1,24 +1,53 @@
 unit class CSV::Table;
 
 use JSON::Fast;
+use YAMLish;
 use Text::Utils :strip-comment, :normalize-text, :count-substrs;
 
 has $.csv; #is required;
 
+# the default strings:
+constant $yaml = q:to/HERE/;
+separator:        auto # auto, comma, pipe, semicolon, tab
+trim:             true
+normalize:        true
+comment-char:     \#
+has-header:       true
+line-ending:      \\n
+raw-ending:       -raw
+empty-cell-value: ""
+has-row-names:    false
+HERE
+
+constant $json = q:to/HERE/;
+{
+"separator":        "auto",
+"trim":             true,
+"normalize":        true,
+"comment-char":     "#",
+"has-header":       true,
+"line-ending":      "\n",
+"raw-ending":       "-raw",
+"empty-cell-value": "",
+"has-row-names":    false
+}
+HERE
+
 # 10 options
-has $.separator is rw  = 'auto'; # auto, comma, pipe, semicolon, tab
-has $.trim             = True;
-has $.normalize        = True;
-has $.comment-char     = '#';
-has $.has-header       = True;
-has $.line-ending      = "\n";
-has $.raw-ending is rw = "-raw";
-has $.empty-cell-value = "";
-has $.has-row-names    = False;
-has $.config; # JSON file name; empty unless using it; 
-              # if used, contents take precedence over
-              # other entries
+has      $.separator is rw  = 'auto'; # auto, comma, pipe, semicolon, tab
+has Bool $.trim             = True;
+has Bool $.normalize        = True;
+has      $.comment-char     = '#';
+has Bool $.has-header       = True;
+has      $.line-ending      = "\n";
+has      $.raw-ending is rw = "-raw";
+has      $.empty-cell-value = "";
+has Bool $.has-row-names    = False;
+has      $.config; # JSON file name; empty unless using it;
+                   # if used, contents take precedence over
+                   # other entries
 # end options
+
 has $.ulname; # "corner" cell contents when header and row names are used
 has $.raw-csv;
 
@@ -62,14 +91,22 @@ submethod TWEAK() {
 
     # Read any config file
     if $!config.defined and $!config.IO.r {
-        # expected to be named .json
-        # but read anyway 
-        my $jstr = slurp $!config;
-        my %h = from-json $jstr;
+        my $typ = get-config-ftype $!config;
+        my $str = slurp $!config;
+        my %h;
+        if $typ ~~ /:i json/ {
+            %h = from-json $str;
+        }
+        elsif $typ ~~ /:i yaml/ {
+            %h = load-yaml $str;
+        }
+        else {
+            die "FATAL: Unknown config file type.";
+        }
         # fill in new values
         for %h.kv -> $k, $v {
             with $k {
-                when /separator/          { $!separator        = $v } 
+                when /separator/          { $!separator        = $v }
                   #  = 'auto'; # auto, comma, pipe, semicolon, tab
                 when /trim/               { $!trim             = $v } # = True;
                 when /normalize/          { $!normalize        = $v } # = True;
@@ -84,6 +121,7 @@ submethod TWEAK() {
             }
         }
     }
+
     if not $!csv.defined {
         # allow the method write-config to be called without an object
         return;
@@ -122,7 +160,7 @@ submethod TWEAK() {
         # array (or -1 if this is a beginning comment). Use a Comment
 
         # object to save data.
-            
+
         # Note we could have a line with just one or more comment chars and
         # there also may be whitespace
         my ($c, $idx);
@@ -191,7 +229,6 @@ submethod TWEAK() {
             %!colnum{$nam} = $i;
             %!colname{$i}  = $nam;
         }
-
     }
     else {
         $nfields = $maxseps + 1;
@@ -281,13 +318,13 @@ method slice(Range $rows, Range $cols --> Array) {
         @arr.push: @cells;
     }
     @arr
-} 
+}
 
 method save-as($stem is copy, :$force) {
     # strip off any .csv
     $stem ~~ s/:i '.' csv $//;
 }
- 
+
 method save(:$force, :$stem) {
     # defining $stem is a file rename
     my ($csv, $raw);
@@ -472,6 +509,22 @@ method rows    { @!cell.elems      }
 method cols    { @!cell.head.elems }
 method columns { @!cell.head.elems }
 
+sub get-config-ftype($config) is export(:get-config-ftype) {
+    # current choice is yaml or json
+    my $s = $config.IO.lines.head;
+    
+    if $s ~~ /^ \s* '{'/ {
+        return "json";
+    }
+
+    for $config.IO.lines -> $line is copy {
+        $line = strip-comment $line;
+        next if $line !~~ /\S/;
+        return "yamlyml" if $line ~~ /\s* <-[:]>+ ':' <-[:]>+ $/;
+    }
+    "unknown"
+}
+
 method !process-header(
     # must pass $!attr values because this sub is called by TWEAK
     $header,
@@ -497,14 +550,14 @@ method !process-line(
 } # method !process-line
 
 sub process-header(
-    # must pass $!attr values because this sub is called by TWEAK
-    $header,
-    :$separator!,
-    :$normalize!,
-    :$trim!,
-    :$debug,
-    :$has-row-names!,
-    #--> Line
+     # must pass $!attr values because this sub is called by TWEAK
+     $header,
+     :$separator!,
+Bool :$normalize!,
+Bool :$trim!,
+     :$debug,
+Bool :$has-row-names!,
+     --> Line
 ) {
     my @arr = $header.split(/$separator/);
     my $o = Line.new;
@@ -625,18 +678,18 @@ sub process-header(
 } # sub process-header
 
 sub process-line(
-    # must pass $!attr values because this sub is called by TWEAK
-    $line,
-    :$line-num!,
-    :$separator!,
-    :$has-header!, # is this needed here? YES
-    :$nfields!,
-    :$normalize!,
-    :$has-row-names!,
-    :$empty-cell-value!,
-    :$trim!,
-    :$debug,
-    --> Line
+     # must pass $!attr values because this sub is called by TWEAK
+     $line,
+     :$line-num!,
+     :$separator!,
+Bool :$has-header!, # is this needed here? YES
+     :$nfields!,
+Bool :$normalize!,
+Bool :$has-row-names!,
+     :$empty-cell-value!,
+Bool :$trim!,
+     :$debug,
+     --> Line
 ) {
     my @arr = $line.split(/$separator/);
     my $o = Line.new;
@@ -673,7 +726,7 @@ sub process-line(
     if $has-header {
         if $o.arr.elems > $nfields {
             die qq:to/HERE/;
-            FATAL: Data row with index $line-num has more cells ({$o.arr.elems}) than 
+            FATAL: Data row with index $line-num has more cells ({$o.arr.elems}) than
                    the header row which has only $nfields.
             HERE
         }
@@ -722,54 +775,36 @@ sub get-sepchar($header, :$debug) {
 
 } # sub get-sepchar
 
+enum CT is export(:CT) <yaml yam ya y yml ym json jso js j>;
 method write-config(
     $f? is copy, # the suffix must be one of: .json, .yml, or .yaml
-    :$type is copy where {/:i <[yaml]> | <[json]>/ }, 
-    :$force
+ CT :$type,
+    :$force,
+    :$quiet,
 ) {
 
     # the default config file type is YAML
     my $ftype = "YAML";
     my $fsuff = ".yml";
 
-    # the default strings:
-    my $yaml = q:to/HERE/;
-    separator:        auto # auto, comma, pipe, semicolon, tab
-    trim:             True
-    normalize:        True
-    comment-char:     \#
-    has-header:       True
-    line-ending:      \\n
-    raw-ending:       -raw
-    empty-cell-value: "";
-    has-row-names:    False
-    HERE
-
-    my $json = q:to/HERE/;
-    {
-    "separator":        "auto",
-    "trim":             "True",
-    "normalize":        "True",
-    "comment-char":     "#",
-    "has-header":       "True",
-    "line-ending":      "\n",
-    "raw-ending":       "-raw",
-    "empty-cell-value": "",
-    "has-row-names":    "False"
-    }
-    HERE
-
     my $ostr  = $yaml;
     my ($wyaml, $wjson);
 
     with $type {
-        when /:i<[json]>/ {
+        # fatal if $f is defined
+        if $f.defined {
+            die qq:to/HERE/;
+            FATAL: Both \$f and \$type are defined!
+            HERE
+        }
+
+        when $_ ~~ json|jso|js|j {
             $wjson = $json;
             $fsuff = "json";
             $ftype = "JSON";
             $ostr  = $json;
         }
-        when /:i<[yaml]>/ {
+        when $_ ~~ yaml|yam|ya|y|yml|ym {
             $wyaml = $yaml;
             $fsuff = "yml";
             $ftype = "YAML";
@@ -804,13 +839,13 @@ method write-config(
         die "FATAL: Unexpected failure. Please file an issue."
     }
 
-    if $f.IO.r {
+    if $f.defined and $f.IO.e and $f.IO.r {
         if $force.defined {
             $f.IO.spurt: $ostr;
         }
         else {
-            say "File $f exists. Use the $force option to over-write it.";
-            return;
+            say "File $f exists. Use the 'force' option to over-write it.";
+            exit; # return;
         }
     }
     else {
@@ -818,4 +853,3 @@ method write-config(
     }
     say "See CSV::Table $ftype configuration file '$f'";
 }
-

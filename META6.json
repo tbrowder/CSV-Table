@@ -6,6 +6,7 @@
   "build-depends": [
   ],
   "depends": [
+    "YAMLish",
     "JSON::Fast",
     "File::Temp",
     "Text::Utils:ver<3.4.0+>"

@@ -1,0 +1,9 @@
+separator:        \t    # 
+trim:             False
+normalize:        False
+comment-char:     ; 
+has-header:       True
+line-ending:      '||' 
+raw-ending:       -clean
+empty-cell-value: 0	
+has-row-names:    False
