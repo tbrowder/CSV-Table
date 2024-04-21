@@ -36,11 +36,16 @@ my $f1 = "t/data/conf-test.csv";
 my $t;
 
 $t = CSV::Table.new: :csv($f1), :config($cy);
-is $t.has-header, True;
-is $t.separator, '\t';
-is $t.comment-char, ";";
-is $t.line-ending, '||';
-$t.save: "test-out";
+is $t.has-header, True, "has header";
+is $t.separator, '\t', "sep char is a tab";
+is $t.comment-char, ";", "comment-char semicolon";
+is $t.line-ending, '||', "line-ending '||'";
+my $tstem = "test-out";
+my $tcsv = $tstem ~ ".csv";
+my $traw = $tstem ~ $t.raw-ending ~ ".csv";
+$t.save: $tstem;
+is $tcsv.IO.r, True;
+is $traw.IO.r, True;
 
 done-testing;
 =finish

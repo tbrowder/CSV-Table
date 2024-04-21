@@ -470,7 +470,7 @@ method save-as($stem is copy, :$force) {
     }
 }
 
-method save(:$force, :$stem) {
+method save($stem?, :$force) {
     # defining $stem is a file rename
     my ($csv, $raw);
     if $stem.defined {
@@ -510,7 +510,7 @@ method save(:$force, :$stem) {
     }
 
     if $wraw {
-        my $fh = open $!raw-csv, :w, :nl-out($!line-ending);
+        my $fh = open $raw, :w, :nl-out($!line-ending);
         # Use proper sepchar, respect max col width # with sprintf
         my $ne = @!col-width.elems;
         if $!has-header {
@@ -549,7 +549,7 @@ method save(:$force, :$stem) {
 
     if $wcsv {
         # Add back the stripped comments
-        my $fh = open $!raw-csv, :w, :nl-out($!line-ending);
+        my $fh = open $csv, :w, :nl-out($!line-ending);
         # Use proper sepchar, respect max col width # with sprintf
         my $ne = @!col-width.elems;
 
