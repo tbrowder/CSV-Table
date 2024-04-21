@@ -1,6 +1,10 @@
 use Test;
 use CSV::Table;
 
+use File::Temp;
+
+my $debug = 1; # output files are place in local dir "tmp"
+
 # this is the single "master" csv file with all possible comment placements:
 my $csv  = 't/data/commented.csv';
 
@@ -34,10 +38,20 @@ Sally   Jean,21 # she really is        < line  1, inline
 #                                      < line  1, trailing[1]
 =end comment
 
+# actual contents of t/data/commented.csv
+=begin comment
+# a commen,age
+      name,age
+# Sally is my sister
+Sally Jean,# she really is
+# another comment
+# 
+=end comment
+
 is $csv.IO.r, True;
 
 my $t = CSV::Table.new: :$csv;
-is $t.comment<-1>.trailing.head, "# a commented CSV file";
+is $t.comment<-1>.trailing.head, "# a commen,age";
 
 is $t.field.elems, 2, "field elems 2";
 is $t.field[0], 'name', "field 0 'name'";
@@ -47,10 +61,19 @@ is $t.cell.elems, 1;
 
 is $t.cell[0].elems, 2;
 is $t.cell[0][0], 'Sally Jean';
-is $t.cell[0][1], '21';
+is $t.cell[0][1], '';
 
 is $t.raw-csv, 't/data/commented-raw.csv', 'in same dir as src csv';
-$t.save: :force;
+
+# test saving in a temp dir
+my $tdir = $debug ?? "tmp" !! tempdir;
+mkdir $tdir;
+
+my $tcsv     = "$tdir/saved.csv";
+my $tcsv-raw = "$tdir/saved-raw.csv";
+$t.save: $tcsv, :force;
+is $tcsv.IO.r, True;
+is $tcsv-raw.IO.r, True;
 
 my $s1 = slurp $csv;
 my $s2 = slurp $csv2;
