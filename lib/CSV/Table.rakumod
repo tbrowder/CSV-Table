@@ -469,10 +469,11 @@ method save-as($stem is copy, :$force) {
     }
 }
 
-method save($stem?, :$force) {
+method save($stem? is copy, :$force) {
     # defining $stem is a file rename
     my ($csv, $raw);
     if $stem.defined {
+        $stem ~~ s/:i '.' csv $//;
         $csv = $stem ~ '.csv';
         $raw = $stem ~ $.raw-ending ~ '.csv';
     }

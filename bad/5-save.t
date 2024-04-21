@@ -10,16 +10,16 @@ my $csv  = 't/data/commented.csv';
 
 # these are the expected files produced upon .save:
 #   no comments, cell separation by a single space
-my $csv1 = 't/data/expected/commented-raw.csv';
+my $csv1r = 't/data/expected/commented-raw.csv';
 #   no comments, columns aligned by max field width
-my $csv2 = 't/data/expected/commented-raw2.csv';
+my $csv2r = 't/data/expected/commented-raw2.csv';
 #   no comments, columns aligned by max field width, change sepchar to pipe
-my $csv3 = 't/data/expected/commented-raw3.csv';
+my $csv3r = 't/data/expected/commented-raw3.csv';
 
 #   comments per original spacing, cell separation by a single space
-my $csv4 = 't/data/expected/commented3.csv';
+my $csv1 = 't/data/expected/commented3.csv';
 #   comments per original spacing, cells aligned by max field width 
-my $csv5 = 't/data/expected/commented4.csv';
+my $csv2 = 't/data/expected/commented4.csv';
 
 # for future use with normalized comments
 #   comments normalized, cells aligned by max field width 
@@ -69,14 +69,21 @@ is $t.raw-csv, 't/data/commented-raw.csv', 'in same dir as src csv';
 my $tdir = $debug ?? "tmp" !! tempdir;
 mkdir $tdir;
 
-my $tcsv     = "$tdir/saved.csv";
-my $tcsv-raw = "$tdir/saved-raw.csv";
+my $tcsv  = "$tdir/saved.csv";
+my $tcsv2 = "$tdir/saved-raw.csv";
 $t.save: $tcsv, :force;
-is $tcsv.IO.r, True;
-is $tcsv-raw.IO.r, True;
+is $tcsv.IO.r, True, "saved new csv file ok";
+is $tcsv2.IO.r, True, "saved new raw csv file ok";
 
-my $s1 = slurp $csv;
-my $s2 = slurp $csv2;
+# are the outputs the same as expected?
+# the outputs:
+my $s1 = slurp $tcsv;
+my $s2 = slurp $tcsv2;
+# the expected:
+my $s1e = slurp $csv1;
+my $s2e = slurp $tcsv2;
+
+is $s1, $s1e;
 
 # test all comment combos
 
