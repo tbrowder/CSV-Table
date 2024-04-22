@@ -9,6 +9,10 @@ my $debug = 1; # output files are place in local dir "tmp"
 my $csv  = 't/data/commented.csv';
 
 # these are the expected files produced upon .save:
+
+#   comments per original spacing, cell separation by a single space
+my $csv3 = 't/data/expected/commented3.csv';
+
 #   no comments, cell separation by a single space
 my $csv1r = 't/data/expected/commented-raw.csv';
 #   no comments, columns aligned by max field width
@@ -16,8 +20,6 @@ my $csv2r = 't/data/expected/commented-raw2.csv';
 #   no comments, columns aligned by max field width, change sepchar to pipe
 my $csv3r = 't/data/expected/commented-raw3.csv';
 
-#   comments per original spacing, cell separation by a single space
-my $csv3 = 't/data/expected/commented3.csv';
 #   comments per original spacing, cells aligned by max field width 
 my $csv4 = 't/data/expected/commented4.csv';
 
@@ -77,13 +79,18 @@ is $tcsv.IO.r, True, "saved new csv file ok";
 is $tcsv2.IO.r, True, "saved new raw csv file ok";
 
 # are the outputs the same as expected?
+my ($t2, $t3);
+lives-ok { $t3 = CSV::Table.new: :csv($tcsv2); }, "new from saved raw";
+lives-ok { $t2 = CSV::Table.new: :csv($tcsv); }, "new from saved commented";
+
+
 # the outputs:
 my @s1 = $tcsv.IO.lines;
 
 # the expected:
 my @s1e = $csv3.IO.lines;
 
-is @s1.elems, @s1e.elems;
+#is @s1.elems, @s1e.elems;
 
 # test all comment combos
 

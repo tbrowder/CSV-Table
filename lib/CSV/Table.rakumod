@@ -320,155 +320,6 @@ method slice(Range $rows, Range $cols --> Array) {
     @arr
 }
 
-method save-as($stem is copy, :$force) {
-    # strip off any .csv
-    $stem ~~ s/:i '.' csv $//;
-    my ($csv, $raw);
-    $csv = $stem ~ '.csv';
-    $raw = $stem ~ $.raw-ending ~ '.csv';
-
-    my $wraw = $force ?? True !! False;
-    my $wcsv = $force ?? True !! False;
-
-    if not $force and $raw.IO.e {
-        say "File '$raw' exists.";
-        my $res = prompt "Overwrite file '$raw'? (Y/n) ";
-        if $res ~~ /:i y/ {
-            $wraw = True;
-            say "Overwriting file '$raw'...";
-        }
-        else {
-            say "File '$raw' was not overwritten.";
-        }
-    }
-    if not $force and $csv.IO.e {
-        say "File '$csv' exists.";
-        my $res = prompt "Overwrite file '$csv'? (Y/n) ";
-        if $res ~~ /:i y/ {
-            $wcsv = True;
-            say "Overwriting file '$csv'...";
-        }
-        else {
-            say "File '$csv' was not overwritten.";
-        }
-    }
-
-    if $wraw {
-        my $fh = open $!raw-csv, :w, :nl-out($!line-ending);
-        # Use proper sepchar, respect max col width # with sprintf
-        my $ne = @!col-width.elems;
-        if $!has-header {
-            for @!field.kv -> $i, $v {
-                my $w = @!col-width[$i];
-                my $s = sprintf "%*.*s", $w, $w, $v;
-                if $i < $ne-1 {
-                    $fh.print: $s;
-                    $fh.print: $!separator;
-                }
-                else {
-                    $fh.say: $s;
-                }
-            }
-        }
-        for @!cell.kv -> $i, $v {
-            my $w = @!col-width[$i];
-            my $s = sprintf "%*.*s", $w, $w, $v;
-            if $i < $ne-1 {
-                $fh.print: $s;
-                $fh.print: $!separator;
-            }
-            else {
-                $fh.say: $s;
-            }
-        }
-    }
-
-    =begin comment
-    class Comment {
-        has $.inline   = 0;  # inline after the comment char
-        has @.trailing = []; # one or more comment-only lines
-    }
-    has %.comment; # @lines index number (includes any header) => Comment
-    =end comment
-
-    if $wcsv {
-        # Add back the stripped comments
-        my $fh = open $!raw-csv, :w, :nl-out($!line-ending);
-        # Use proper sepchar, respect max col width # with sprintf
-        my $ne = @!col-width.elems;
-
-        my $lnum = -1;
-        my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
-        # print any leading comments
-        if $c {
-            # sanity check
-            die "FATAL: Unexpected error: please file an issue" if $c.inline;
-            for $c.trailing {
-                $fh.say: $_;
-            }
-        }
-
-        if $!has-header {
-
-            ++$lnum;
-            my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
-
-            for @!field.kv -> $i, $v {
-                my $w = @!col-width[$i];
-                my $s = sprintf "%*.*s", $w, $w, $v;
-                if $i < $ne-1 {
-                    $fh.print: $s;
-                    $fh.print: $!separator;
-                }
-                else {
-                    # print the last field plus any inline comment
-                    if $c and $c.inline {
-                        $fh.print: $s;
-                        $fh.say:   $c.inline;
-                    }
-                    else {
-                        $fh.say: $s;
-                    }
-                }
-            }
-            # print any trailing comments
-            if $c and $c.trailing.elems {
-                for $c.trailing {
-                    $fh.say: $_;
-                }
-            }
-        }
-        for @!cell.kv -> $i, $v {
-
-            ++$lnum;
-            my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
-
-            my $w = @!col-width[$i];
-            my $s = sprintf "%*.*s", $w, $w, $v;
-            if $i < $ne-1 {
-                $fh.print: $s;
-                $fh.print: $!separator;
-            }
-            else {
-                # print the last field plus any inline comment
-                if $c and $c.inline {
-                    $fh.print: $s;
-                    $fh.say:   $c.inline;
-                }
-                else {
-                    $fh.say: $s;
-                }
-            }
-            # print any trailing comments
-            if $c and $c.trailing.elems {
-                for $c.trailing {
-                    $fh.say: $_;
-                }
-            }
-        }
-    }
-}
-
 method save($stem? is copy, :$force) {
     # defining $stem is a file rename
     my ($csv, $raw);
@@ -508,7 +359,7 @@ method save($stem? is copy, :$force) {
             say "File '$csv' was not overwritten.";
         }
     }
-
+   
     if $wraw {
         my $fh = open $raw, :w, :nl-out($!line-ending);
         # Use proper sepchar, respect max col width # with sprintf
@@ -557,7 +408,7 @@ method save($stem? is copy, :$force) {
         my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
         # print any leading comments
         if $c {
-            # sanity check
+            # sanity check: there should be NO inline comment
             die "FATAL: Unexpected error: please file an issue" if $c.inline;
             for $c.trailing {
                 $fh.say: $_;
@@ -566,7 +417,7 @@ method save($stem? is copy, :$force) {
 
         if $!has-header {
 
-            ++$lnum;
+            ++$lnum; # set to first line number
             my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
 
             for @!field.kv -> $i, $v {
@@ -594,6 +445,7 @@ method save($stem? is copy, :$force) {
                 }
             }
         }
+
         for @!cell.kv -> $i, $v {
 
             ++$lnum;
