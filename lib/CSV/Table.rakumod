@@ -11,9 +11,9 @@ constant $yaml = q:to/HERE/;
 separator:        auto # auto, comma, pipe, semicolon, tab
 trim:             true
 normalize:        true
-comment-char:     \#
+comment-char:     '#'
 has-header:       true
-line-ending:      \\n
+line-ending:      '\n'
 raw-ending:       -raw
 empty-cell-value: ""
 has-row-names:    false
@@ -24,9 +24,9 @@ constant $json = q:to/HERE/;
 "separator":        "auto",
 "trim":             true,
 "normalize":        true,
-"comment-char":     "#",
+"comment-char":     '#',
 "has-header":       true,
-"line-ending":      "\n",
+"line-ending":      '\n',
 "raw-ending":       "-raw",
 "empty-cell-value": "",
 "has-row-names":    false

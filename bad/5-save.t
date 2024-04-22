@@ -17,9 +17,9 @@ my $csv2r = 't/data/expected/commented-raw2.csv';
 my $csv3r = 't/data/expected/commented-raw3.csv';
 
 #   comments per original spacing, cell separation by a single space
-my $csv1 = 't/data/expected/commented3.csv';
+my $csv3 = 't/data/expected/commented3.csv';
 #   comments per original spacing, cells aligned by max field width 
-my $csv2 = 't/data/expected/commented4.csv';
+my $csv4 = 't/data/expected/commented4.csv';
 
 # for future use with normalized comments
 #   comments normalized, cells aligned by max field width 
@@ -71,19 +71,19 @@ mkdir $tdir;
 
 my $tcsv  = "$tdir/saved.csv";
 my $tcsv2 = "$tdir/saved-raw.csv";
+
 $t.save: $tcsv, :force;
 is $tcsv.IO.r, True, "saved new csv file ok";
 is $tcsv2.IO.r, True, "saved new raw csv file ok";
 
 # are the outputs the same as expected?
 # the outputs:
-my $s1 = slurp $tcsv;
-my $s2 = slurp $tcsv2;
-# the expected:
-my $s1e = slurp $csv1;
-my $s2e = slurp $tcsv2;
+my @s1 = $tcsv.IO.lines;
 
-is $s1, $s1e;
+# the expected:
+my @s1e = $csv3.IO.lines;
+
+is @s1.elems, @s1e.elems;
 
 # test all comment combos
 
