@@ -367,7 +367,8 @@ method save($stem? is copy, :$force) {
         if $!has-header {
             for @!field.kv -> $i, $v {
                 my $w = @!col-width[$i];
-                my $s = sprintf "%*.*s", $w, $w, $v;
+                my $s = sprintf "%-*.*s", $w, $w, $v;
+                $fh.print(" ") if $i;
                 if $i < $ne-1 {
                     $fh.print: $s;
                     $fh.print: $!separator;
@@ -379,7 +380,8 @@ method save($stem? is copy, :$force) {
         }
         for @!cell.kv -> $i, $v {
             my $w = @!col-width[$i];
-            my $s = sprintf "%*.*s", $w, $w, $v;
+            my $s = sprintf "%-*.*s", $w, $w, $v;
+            $fh.print(" ") if $i;
             if $i < $ne-1 {
                 $fh.print: $s;
                 $fh.print: $!separator;
@@ -422,7 +424,8 @@ method save($stem? is copy, :$force) {
 
             for @!field.kv -> $i, $v {
                 my $w = @!col-width[$i];
-                my $s = sprintf "%*.*s", $w, $w, $v;
+                my $s = sprintf "%-*.*s", $w, $w, $v;
+                $fh.print(" ") if $i;
                 if $i < $ne-1 {
                     $fh.print: $s;
                     $fh.print: $!separator;
@@ -452,7 +455,8 @@ method save($stem? is copy, :$force) {
             my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
 
             my $w = @!col-width[$i];
-            my $s = sprintf "%*.*s", $w, $w, $v;
+            my $s = sprintf "%-*.*s", $w, $w, $v;
+            $fh.print(" ") if $i;
             if $i < $ne-1 {
                 $fh.print: $s;
                 $fh.print: $!separator;
