@@ -2,50 +2,60 @@ use Test;
 
 use YAMLish;
 use JSON::Fast;
-	
+use File::Temp;
+
 use CSV::Table :CT;
 
-# the test csv contents (5 lines:
-=begin comment
-; tabs, '||' line endings ||
-name	 age 	 notes ||
- Sally   
-Jean	22 ||
-Tom	 30	 male
-=end comment
+my $debug = 1; # output files are place in local dir "tmp"
 
+# test saving in a temp dir
+my $tdir = $debug ?? "tmp" !! tempdir;
+mkdir $tdir;
+
+# the test csv contents (4 lines)
+# by line without the '||' line endings:
+my @csv = [
+"; tabs, '||' line endings ",
+"name	 age 	 notes ",
+" Sally   
+Jean	22 ",
+"Tom	 30	 rakuun"
+];
+
+# the test file
+my $f = "$tdir/conf-test.csv";
+
+# write the test file
+my $fh = open $f, :w, :nl-out("||");
+for @csv {
+    $fh.say: $_;
+}
+$fh.close;
 
 my ($of1, $of2, $f3, $f4, $f5, $f6);
-$of1 = "config-csv-table.yml";
-$of2 = "config-csv-table.json";
-sub D($f) { unlink($f) if $f and $f.IO.r; }
-=begin comment
-BEGIN { 
-    D $of1; D $of2;# D $f3; D $f4; D $f5; D $f6; 
-}
-END { 
-    D $of1; D $of2;# D $f3; D $f4; D $f5; D $f6; 
-}
-=end comment
+$of1 = "$tdir/config-csv-table.yml";
+$of2 = "$tdir/config-csv-table.json";
 
 my $cy = "t/data/conf-rev.yml";
 my $cj = "t/data/conf-rev.json";
 
-my $f1 = "t/data/conf-test.csv";
-
 my $t;
 
-$t = CSV::Table.new: :csv($f1), :config($cy);
+$t = CSV::Table.new: :csv($f), :config($cy);
 is $t.has-header, True, "has header";
 is $t.separator, '\t', "sep char is a tab";
 is $t.comment-char, ";", "comment-char semicolon";
 is $t.line-ending, '||', "line-ending '||'";
-my $tstem = "test-out";
+
+is $tdir.IO.d, True, "making dir '$tdir'";
+
+my $tstem = "$tdir/test-out";
 my $tcsv = $tstem ~ ".csv";
 my $traw = $tstem ~ $t.raw-ending ~ ".csv";
-$t.save: $tstem;
-is $tcsv.IO.r, True;
-is $traw.IO.r, True;
+lives-ok { $t.save: $tstem, :force; }, "save and rename";
+
+is $tcsv.IO.r, True, "commented written";
+is $traw.IO.r, True, "commented -clean written";
 
 done-testing;
 =finish

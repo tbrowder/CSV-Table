@@ -1,9 +1,11 @@
 use Test;
-use CSV::Table;
 
 use File::Temp;
 
-my $debug = 1; # output files are place in local dir "tmp"
+use CSV::Table;
+
+
+my $debug = 0; # output files are place in local dir "tmp"
 
 # this is the single "master" csv file with all possible comment placements:
 my $csv  = 't/data/commented.csv';
@@ -80,15 +82,17 @@ is $tcsv2.IO.r, True, "saved new raw csv file ok";
 
 # are the outputs the same as expected?
 my ($t2, $t3);
-lives-ok { $t3 = CSV::Table.new: :csv($tcsv2); }, "new from saved raw";
 lives-ok { $t2 = CSV::Table.new: :csv($tcsv); }, "new from saved commented";
+lives-ok { $t3 = CSV::Table.new: :csv($tcsv2); }, "new from saved raw";
 
 
 # the outputs:
 my @s1 = $tcsv.IO.lines;
+is @s1.elems, 6, "file '$tcsv': 6 lines";
 
 # the expected:
 my @s1e = $csv3.IO.lines;
+is @s1e.elems, 6, "file '$csv3': 6 lines";
 
 #is @s1.elems, @s1e.elems;
 

@@ -173,7 +173,7 @@ submethod TWEAK() {
             $maxseps = $ns if $ns > $maxseps;
         }
 
-        if $comment ~~ /\S/ {
+        if $comment.defined and $comment ~~ /\S/ {
             $idx = @lines.elems ?? (@lines.elems - 1) !! -1;
             if %!comment{$idx}:exists {
                 %!comment{$idx}.trailing.push: $comment;
@@ -192,20 +192,35 @@ submethod TWEAK() {
             }
             note "DEBUG: sepchar = $!separator" if 0 or $debug;
         }
-    }
+    } # end of file read loop
     $fh.close;
 
     # sanity check
     if @nseps.elems != @lines.elems {
         die "FATAL: \@nseps.elems ({@nseps.elems}) != \@lines.elems ({@lines.elems})";
     }
+    if not @nseps.elems {
+        die "FATAL: \@nseps.elems are zero";
+    }
+    if not @lines.elems {
+        die "FATAL: \@lines.elems are zero";
+    }
 
     # process any header and lines now that we know the separator
+
+    # handle any leading comments occuring before the first data or header line
+    if %!comment<-1>:exists {
+        #die "tom, fix this";
+    }
+
     my $nfields = 0;
     my $ncols   = 0;
     my $row; # holds a Line object
     if $!has-header {
         # TODO handle row names
+        if not @lines.elems {
+            die "FATAL: Unexpected empty \@lines array, file '$!csv'";
+        }
         $header = @lines.shift;
         $row = process-header $header, :separator($!separator),
                               :has-row-names($!has-row-names),
@@ -367,7 +382,13 @@ method save($stem? is copy, :$force) {
         if $!has-header {
             for @!field.kv -> $i, $v {
                 my $w = @!col-width[$i];
-                my $s = sprintf "%-*.*s", $w, $w, $v;
+                my $s;
+                if $w ~~ Numeric {
+                    $s = sprintf "%-*.*s", $w, $w, $v;
+                }
+                else {
+                    $s = sprintf "%s", $v;
+                }
                 $fh.print(" ") if $i;
                 if $i < $ne-1 {
                     $fh.print: $s;
@@ -380,7 +401,13 @@ method save($stem? is copy, :$force) {
         }
         for @!cell.kv -> $i, $v {
             my $w = @!col-width[$i];
-            my $s = sprintf "%-*.*s", $w, $w, $v;
+            my $s;
+            if $w ~~ Numeric {
+                $s = sprintf "%-*.*s", $w, $w, $v;
+            }
+            else {
+                $s = sprintf "%s", $v;
+            }
             $fh.print(" ") if $i;
             if $i < $ne-1 {
                 $fh.print: $s;
@@ -390,6 +417,7 @@ method save($stem? is copy, :$force) {
                 $fh.say: $s;
             }
         }
+        $fh.close;
     }
 
     =begin comment
@@ -449,13 +477,34 @@ method save($stem? is copy, :$force) {
             }
         }
 
-        for @!cell.kv -> $i, $v {
+        for @!cell.kv -> $i, $v is copy {
+            #if $v.WHAT ~~ Array {
+            if $v ~~ Array {
+                $v = $v.head;
+                #note "DEBUG2: \$v.head: '$v'";
+            }
+            #elsif $v.WHAT ~~ Str {
+            elsif $v ~~ Str {
+                #note "DEBUG2: \$v: '$v'";
+            }
+            else {
+                die "FATAL: Unexpected type or value for \$v";
+                #note "DEBUG: \$v.WHAT: ", $v.WHAT;
+                #note "DEBUG: ", $v.gist;
+            }
 
             ++$lnum;
             my $c = %!comment{$lnum}:exists ?? %!comment{$lnum} !! 0;
 
             my $w = @!col-width[$i];
-            my $s = sprintf "%-*.*s", $w, $w, $v;
+            my $s;
+            if $w ~~ Numeric {
+                $s = sprintf "%-*.*s", $w, $w, $v;
+            }
+            else {
+                $s = sprintf "%s", $v;
+            }
+
             $fh.print(" ") if $i;
             if $i < $ne-1 {
                 $fh.print: $s;
@@ -478,6 +527,7 @@ method save($stem? is copy, :$force) {
                 }
             }
         }
+        $fh.close;
     }
 }
 
