@@ -152,7 +152,7 @@ submethod TWEAK() {
         note "DEBUG: line = $line" if $debug;
         my $comment;
 
-        ($line, $comment) = strip-comment $line, :save-comment;
+        ($line, $comment) = strip-comment $line, :mark($cchar), :save-comment;
         # Comment lines:
         # Save the line and retain its postion for reassembly.
         # We use the %!comment hash with a key as the index number

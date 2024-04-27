@@ -13,18 +13,17 @@ my $tdir = $debug ?? "tmp" !! tempdir;
 mkdir $tdir;
 
 # the test csv contents (4 lines)
-# by line without the '||' line endings:
+# by line without a defined line ending
 my @csv = [
 "; tabs, '||' line endings ",
-"name	 age 	 notes ",
-" Sally   
-Jean	22 ",
-"Tom	 30	 rakuun"
+"name \t  age \t notes ",
+" Sally 
+Jean \t 22",
+"Tom \t  30 \t rakuun"
 ];
 
 # the test file
 my $f = "$tdir/conf-test.csv";
-
 # write the test file
 my $fh = open $f, :w, :nl-out("||");
 for @csv {
@@ -32,9 +31,9 @@ for @csv {
 }
 $fh.close;
 
-my ($of1, $of2, $f3, $f4, $f5, $f6);
-$of1 = "$tdir/config-csv-table.yml";
-$of2 = "$tdir/config-csv-table.json";
+#my ($of1, $of2, $f3, $f4, $f5, $f6);
+#$of1 = "$tdir/config-csv-table.yml";
+#$of2 = "$tdir/config-csv-table.json";
 
 my $cy = "t/data/conf-rev.yml";
 my $cj = "t/data/conf-rev.json";
@@ -46,9 +45,14 @@ is $t.has-header, True, "has header";
 is $t.separator, '\t', "sep char is a tab";
 is $t.comment-char, ";", "comment-char semicolon";
 is $t.line-ending, '||', "line-ending '||'";
+is $t.normalize, False, "normalize False";
+
+# check values
+is $t.rows, 2, "2 rows";
+is $t.fields, 3, "3 fields";
+is $t.field[0], "name", "field 0 is name";
 
 is $tdir.IO.d, True, "making dir '$tdir'";
-
 my $tstem = "$tdir/test-out";
 my $tcsv = $tstem ~ ".csv";
 my $traw = $tstem ~ $t.raw-ending ~ ".csv";
