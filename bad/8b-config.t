@@ -138,12 +138,13 @@ LE: for @line-endings -> $le {
                 my @tcells = [];
 
                 #===================
+                # default
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v;
                 }
                 is @tcells.elems, 3;
                 # i=1: @hdr  = [" name         ", " age ", " notes " ];
-                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ]; 
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
                 #                 replace 'x' with '\n' or ' '
                 # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
                 if $i == 1 {
@@ -167,6 +168,199 @@ LE: for @line-endings -> $le {
                     is @tcells[2], "rakuun";
                 }
                 #===================
+
+                #===================
+                # normalize tabs
+                for @cells.kv -> $i, $v is copy {
+                    @tcells[$i] = normalize-string $v, :t<n>;
+                }
+                is @tcells.elems, 3;
+                # i=1: @hdr  = [" name         ", " age ", " notes " ];
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
+                #                 replace 'x' with '\n' or ' '
+                # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
+                if $i == 1 {
+                    is @tcells[0], "name";
+                    is @tcells[1], "age";
+                    is @tcells[2], "notes";
+                }
+                elsif $i == 2 {
+                    if $le ~~ /\n/ {
+                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                    }
+                    else {
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                    }
+                    is @tcells[1], "22";
+                    is @tcells[2], "";
+                }
+                elsif $i == 3 {
+                    is @tcells[0], "Tom";
+                    is @tcells[1], "30";
+                    is @tcells[2], "rakuun";
+                }
+                #===================
+
+                #===================
+                # normalize newlines
+                for @cells.kv -> $i, $v is copy {
+                    @tcells[$i] = normalize-string $v, :n<n>;
+                }
+                is @tcells.elems, 3;
+                # i=1: @hdr  = [" name         ", " age ", " notes " ];
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
+                #                 replace 'x' with '\n' or ' '
+                # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
+                if $i == 1 {
+                    is @tcells[0], "name";
+                    is @tcells[1], "age";
+                    is @tcells[2], "notes";
+                }
+                elsif $i == 2 {
+                    if $le ~~ /\n/ {
+                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                    }
+                    else {
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                    }
+                    is @tcells[1], "22";
+                    is @tcells[2], "";
+                }
+                elsif $i == 3 {
+                    is @tcells[0], "Tom";
+                    is @tcells[1], "30";
+                    is @tcells[2], "rakuun";
+                }
+                #===================
+
+                #===================
+                # normalize tabs and newlines
+                for @cells.kv -> $i, $v is copy {
+                    @tcells[$i] = normalize-string $v, :t<n>, :n<n>;
+                }
+                is @tcells.elems, 3;
+                # i=1: @hdr  = [" name         ", " age ", " notes " ];
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
+                #                 replace 'x' with '\n' or ' '
+                # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
+                if $i == 1 {
+                    is @tcells[0], "name";
+                    is @tcells[1], "age";
+                    is @tcells[2], "notes";
+                }
+                elsif $i == 2 {
+                    if $le ~~ /\n/ {
+                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                    }
+                    else {
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                    }
+                    is @tcells[1], "22";
+                    is @tcells[2], "";
+                }
+                elsif $i == 3 {
+                    is @tcells[0], "Tom";
+                    is @tcells[1], "30";
+                    is @tcells[2], "rakuun";
+                }
+                #===================
+
+                #===================
+                # collapse to spaces
+                for @cells.kv -> $i, $v is copy {
+                    @tcells[$i] = normalize-string $v, c:<s>;
+                }
+                is @tcells.elems, 3;
+                # i=1: @hdr  = [" name         ", " age ", " notes " ];
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
+                #                 replace 'x' with '\n' or ' '
+                # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
+                if $i == 1 {
+                    is @tcells[0], "name";
+                    is @tcells[1], "age";
+                    is @tcells[2], "notes";
+                }
+                elsif $i == 2 {
+                    if $le ~~ /\n/ {
+                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                    }
+                    else {
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                    }
+                    is @tcells[1], "22";
+                    is @tcells[2], "";
+                }
+                elsif $i == 3 {
+                    is @tcells[0], "Tom";
+                    is @tcells[1], "30";
+                    is @tcells[2], "rakuun";
+                }
+                #===================
+
+                #===================
+                # collapse to tabs
+                for @cells.kv -> $i, $v is copy {
+                    @tcells[$i] = normalize-string $v, :c<t>;
+                }
+                is @tcells.elems, 3;
+                # i=1: @hdr  = [" name         ", " age ", " notes " ];
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
+                #                 replace 'x' with '\n' or ' '
+                # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
+                if $i == 1 {
+                    is @tcells[0], "name";
+                    is @tcells[1], "age";
+                    is @tcells[2], "notes";
+                }
+                elsif $i == 2 {
+                    if $le ~~ /\n/ {
+                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                    }
+                    else {
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                    }
+                    is @tcells[1], "22";
+                    is @tcells[2], "";
+                }
+                elsif $i == 3 {
+                    is @tcells[0], "Tom";
+                    is @tcells[1], "30";
+                    is @tcells[2], "rakuun";
+                }
+                #===================
+
+                #===================
+                # collapse to newlines
+                for @cells.kv -> $i, $v is copy {
+                    @tcells[$i] = normalize-string $v, :c<n>;
+                }
+                is @tcells.elems, 3;
+                # i=1: @hdr  = [" name         ", " age ", " notes " ];
+                # i=2: @row1 = [" Sally x Jean ", " 22  ", "       " ];
+                #                 replace 'x' with '\n' or ' '
+                # i=3: @row2 = [" Tom          ", " 30  ", " rakuun "];
+                if $i == 1 {
+                    is @tcells[0], "name";
+                    is @tcells[1], "age";
+                    is @tcells[2], "notes";
+                }
+                elsif $i == 2 {
+                    if $le ~~ /\n/ {
+                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                    }
+                    else {
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                    }
+                    is @tcells[1], "22";
+                    is @tcells[2], "";
+                }
+                elsif $i == 3 {
+                    is @tcells[0], "Tom";
+                    is @tcells[1], "30";
+                    is @tcells[2], "rakuun";
+                }
+                #===================
+
             }
             $fh.close;
         }
