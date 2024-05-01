@@ -268,7 +268,7 @@ LE: for @line-endings -> $le {
                 #===================
                 # collapse to spaces
                 for @cells.kv -> $i, $v is copy {
-                    @tcells[$i] = normalize-string $v, c:<s>;
+                    @tcells[$i] = normalize-string $v, :c<s>;
                 }
                 is @tcells.elems, 3;
                 # i=1: @hdr  = [" name         ", " age ", " notes " ];
@@ -360,7 +360,6 @@ LE: for @line-endings -> $le {
                     is @tcells[2], "rakuun";
                 }
                 #===================
-
             }
             $fh.close;
         }
