@@ -1,0 +1,11 @@
+The test generator will create individual test files
+in separate directories named for the type of line-ending;
+
+  nl
+  dpipe
+  semi
+
+Each test file will be named by its comment-char (mark)
+and seperator char (sepchar):
+
+  csv

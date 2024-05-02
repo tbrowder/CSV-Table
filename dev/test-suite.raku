@@ -4,7 +4,7 @@ use File::Temp;
 
 use Text::Utils :ALL; #:strip-comment :normalize-string;
 
-my $debug = 1; # output files are place in local dir "tmp"
+my $debug = 1; # output files are placed in local dir "tmp"
 
 # test saving in a temp dir
 my $tdir = $debug ?? "tmp" !! tempdir;
@@ -40,18 +40,9 @@ constant \hash   = "hash";
 constant \semi   = ";";
 constant \dashes = "--";
 
-sub get-abbrev($v) {
-    # plain words for special chars
-    my $abbrev = $v;
-    $abbrev = "pipe"   if $v eq "||";
-    $abbrev = "2pipes" if $v eq "||";
-    $abbrev = "nl"     if $v ~~ /\n/;
-    $abbrev = "tab"    if $v ~~ /\t/;
-    $abbrev = "hash"   if $v ~~ /'#'/;
-    $abbrev = "semi"   if $v eq ';';
-    $abbrev = "dashes" if $v eq '--';
-    $abbrev
-}
+# create a file that lists the test files
+my $flist = "csv-test-input-files-list.txt";
+my $ft = open $flist, :w;
 
 LE: for @line-endings -> $le {
     # currently one of: \n || ;
@@ -61,6 +52,9 @@ LE: for @line-endings -> $le {
     if $le ~~ /\n/ {
         note "DEBUG: line ending is a newline" if 0 and $debug;
     }
+
+    # get the dir name
+    my $odir = "$tdir/$LE";
 
     CC: for @comment-chars -> $cc {
         # currently one of: # ;  --
@@ -77,10 +71,12 @@ LE: for @line-endings -> $le {
 
             my $comment = "Using mark ('$CC'), sepchar ('$SC'), line ending ('$LE')";
 
+            my $fnam = "csv-{$CC}-{$SC}.csv";
+            $fnam = "$odir/$fnam";
 
-            my $num = ++$idx;
-            my $fnam = $prefix ~ sprintf "%02d", $num;
-            $fnam = "$tdir/$fnam";
+            # write to the file name list
+            $ft.say: $fnam;
+        
             my $fh = open $fnam, :w, :nl-out($le); #, :!chomp;
             #===========
             $fh.say: "$cc $comment";
