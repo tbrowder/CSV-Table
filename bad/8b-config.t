@@ -107,13 +107,13 @@ LE: for @line-endings -> $le {
                 $fh.print: $v;
                 $fh.print($sc) if $i < $ncols - 1;
             }
-            $fh.say();
+            $fh.note();
 
             for @row2.kv -> $i, $v is copy {
                 $fh.print: $v;
                 $fh.print($sc) if $i < $ncols - 1;
             }
-            $fh.say();
+            $fh.note();
             #===========
             $fh.close;
 
@@ -170,6 +170,7 @@ LE: for @line-endings -> $le {
                 #===================
 
                 #===================
+                note "DEBUG normalize tabs" if $debug;
                 # normalize tabs
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :t<n>;
@@ -203,6 +204,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # normalize newlines
+                note "DEBUG normalize newlines" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :n<n>;
                 }
@@ -235,6 +237,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # normalize tabs and newlines
+                note "DEBUG normalize tabs and newlines" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :t<n>, :n<n>;
                 }
@@ -267,6 +270,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # collapse to spaces
+                note "DEBUG collapse to spaces" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :c<s>;
                 }
@@ -299,6 +303,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # collapse to tabs
+                note "DEBUG collapse to tabs" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :c<t>;
                 }
@@ -331,6 +336,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # collapse to newlines
+                note "DEBUG collapse to newlines" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :c<n>;
                 }
@@ -365,7 +371,7 @@ LE: for @line-endings -> $le {
         }
     }
 }
-say "Wrote $idx test files" if $debug;
+note "Wrote $idx test files" if $debug;
 done-testing;
 
 exit;
@@ -375,7 +381,7 @@ my $f = "$tdir/conf-test.csv";
 # write the test file
 my $fh = open $f, :w, :nl-out("||");
 for @csv {
-    $fh.say: $_;
+    $fh.note: $_;
 }
 $fh.close;
 
