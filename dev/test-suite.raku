@@ -4,6 +4,9 @@ use File::Temp;
 
 use Text::Utils :ALL; #:strip-comment :normalize-string;
 
+use lib ".";
+use Utils;
+
 my $debug = 1; # output files are placed in local dir "tmp"
 
 # test saving in a temp dir

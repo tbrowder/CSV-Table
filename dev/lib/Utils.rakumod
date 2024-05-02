@@ -1,6 +1,12 @@
 unit module Utils;
 
-sub get-abbrev($v) {
+sub write-csv() is export {
+}
+
+sub write-test() is export {
+}
+
+sub get-abbrev($v) is export {
     # plain words for special chars
     my $abbrev = $v;
     $abbrev = "pipe"   if $v eq "|";
