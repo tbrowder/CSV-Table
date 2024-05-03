@@ -3,9 +3,9 @@ in separate directories named for the type of line-ending;
 
   nl
   dpipe
-  semi
 
 Each test file will be named by its comment-char (mark)
-and seperator char (sepchar):
+and separator char (sepchar):
 
-  csv
+  csv-{$CC}-{$SC}.t
+  csv-{$CC}-{$SC}.csv

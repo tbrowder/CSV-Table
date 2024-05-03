@@ -1,10 +1,12 @@
-use Test;
+#!/usr/bin/env raku
+
+#use Test;
 
 use File::Temp;
 
-use Text::Utils :ALL; #:strip-comment :normalize-string;
+#use Text::Utils :ALL; #:strip-comment :normalize-string;
 
-use lib ".";
+use lib "./t/data/lib";
 use Utils;
 
 my $debug = 1; # output files are placed in local dir "tmp"
@@ -12,6 +14,9 @@ my $debug = 1; # output files are placed in local dir "tmp"
 # test saving in a temp dir
 my $tdir = $debug ?? "tmp" !! tempdir;
 mkdir $tdir;
+mkdir "$tdir/nl";
+mkdir "$tdir/dpipe";
+
 
 # this is the way to most easily create an array of strings
 #my @x = qqww{ "\n"  ; || , "\t" | '#' };
@@ -44,7 +49,7 @@ constant \semi   = ";";
 constant \dashes = "--";
 
 # create a file that lists the test files
-my $flist = "csv-test-input-files-list.txt";
+my $flist = "$tdir/csv-test-input-files-list.txt";
 my $ft = open $flist, :w;
 
 LE: for @line-endings -> $le {
@@ -68,6 +73,9 @@ LE: for @line-endings -> $le {
 
             # currently one of: , ; | \t
             $SC = get-abbrev $sc;
+            note "DEBUG: sepchar '$SC'";
+            next SC if $SC eq $CC;
+?($le.comb (&) $sc.comb);
 
             # semicolons cannot appear in more than one role
             # pipes and double pipes can only appear in one role
@@ -106,16 +114,17 @@ LE: for @line-endings -> $le {
                 $fh.print: $v;
                 $fh.print($sc) if $i < $ncols - 1;
             }
-            $fh.note();
+            $fh.say();
 
             for @row2.kv -> $i, $v is copy {
                 $fh.print: $v;
                 $fh.print($sc) if $i < $ncols - 1;
             }
-            $fh.note();
+            $fh.say();
             #===========
             $fh.close;
 
+            =begin comment
             # Now run tests on the generated file
             note "DEBUG: testing file '$fnam'";
             $fh = open $fnam, :r, :nl-in($le); #, :!chomp;
@@ -367,10 +376,12 @@ LE: for @line-endings -> $le {
                 #===================
             }
             $fh.close;
+            =end comment
         }
     }
 }
 note "Wrote $idx test files" if $debug;
+=finish
 done-testing;
 
 exit;

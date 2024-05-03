@@ -16,5 +16,6 @@ sub get-abbrev($v) is export {
     $abbrev = "hash"   if $v ~~ /'#'/;
     $abbrev = "semi"   if $v eq ';';
     $abbrev = "dashes" if $v eq '--';
+    $abbrev = "comma"  if $v eq ',';
     $abbrev
 }
