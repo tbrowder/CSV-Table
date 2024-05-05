@@ -61,10 +61,10 @@ the corresponding field names in the data hashes, you will most likely
 have problems.  It would be much easier to modify the original CSV
 file.
 
-You can choose to ave the changed data (C<$t.save>) any time, but
+You can choose to have the changed data (C<$t.save>) any time, but
 you will be asked to confirm the save.
 
-You can also save the data in a new file: C<$t.save-as: $stem>. Where
+You can also save the data in a new file: C<$t.save: $stem>. Where
 C<$stem> is the desired basename without a suffix. The new files 
 will have the '.csv' and '-raw.csv' names (or your desired 'raw' file
 string).
@@ -73,13 +73,20 @@ string).
 
 B<CSV::Table> is a class enabling access to a CSV table's
 contents. Tables with a header row must have unique field names.
-
-By default, text is 'normalized', that is, it is trimmed of leading
-and trailing whitespace and multiple contiguous interior whitespaces
-are collapsed into single ones.
-
 Input files are read immediately, so very large files may overwhelm
 system resources.
+
+By default, text in a cell is 'normalized', that is, it is trimmed of leading
+and trailing whitespace and multiple contiguous interior whitespaces
+are collapsed into single ones. In this context, 'whitespace' is
+one or more characters in the set C<(" ", "\t", "\n")>.
+Exceptions to that rule occur when the user wishes to use a
+newline in a cell or a tab is used as a cell separator. 
+In those cases, some other character must be
+chosen as a line-ending or cell separator, and the newline or tab are  
+B<not> considered to be a
+whitespace character for the normalization algorithm. (See more
+details and examples below.)
 
 It can handle the following which other CSV handlers may not:
 
@@ -121,7 +128,7 @@ Comment lines are allowed
 
 This feature, which is not usual in CSV parsers, is to ignore comment
 lines interspersed between data lines (such lines may have leading whitespace).
-Data lines may have inline comments following a comment character.
+Data lines may also have inline comments following a comment character.
 The comment character is user-definable and its presence invalidates its
 use as a field separator. The default comment character is '#'. Its use
 demonstrated:
@@ -134,37 +141,41 @@ demonstrated:
 =end code
 
 Note comments are preserved and restored when the CSV file is saved.
-
 =end item
 
 =begin item
-Save, Save as
+Save
 
 There is a C<save> method which saves the current state of the CSV file
 (including comments) as well as saving a "raw" CSV file without the
 comments so the file can be used with conventional CSV handlers such as
-LibreOffice or Excel.
-
-There is also a C<save-as> method to change the names of the output
+LibreOffice or Excel.  The method can also be used to change the names of the output
 files.
 =end item
 
 =begin item
 Text normalization
 
-Its results are to normalize text in a field, that is: leading and
+Its results are to normalize text in a field or cell, that is: leading and
 trailing whitespace is trimmed and interior whitespace is collapsed to
 one space between words.  This is the default behavior but can be
 turned off if desired (C<normalize=False>).
 In that event, data in all fields are still trimmed of leading and trailing
-whitespace (unless C<trim=False>).
+whitespace (unless C<trim=False>). Some examples:
+
+Cell contents (line ending B<not> a newline): C<' Sally \n Jean  '>; normalized:
+C<'Sally\nJean'>.
+
+Cell contents (tab B<not> a cell separator): C< Sally \t Jean  >; normalized:
+C<'Sally Jean'>.
+
 =end item
 
 =begin item
 Automatic determination of separator character
 
-Unless the field separator is selected otherwise, the first line is
-searched for the most-used separator character from
+Unless the field separator is selected otherwise, the default is 'auto'
+and the first data line is searched for the most-used separator character from
 this list: C<|>, C<;>, C<,> and C<\t>.  Other non-space characters may be used
 but are probably not tested. File an issue if you want to add a
 separator not currently specified.

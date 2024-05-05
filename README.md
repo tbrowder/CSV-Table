@@ -58,18 +58,16 @@ $t.rowcol(0, 1, 50);
 
 You can also change the names of fields, but, unless you also change the corresponding field names in the data hashes, you will most likely have problems. It would be much easier to modify the original CSV file.
 
-You can choose to ave the changed data (`$t.save`) any time, but you will be asked to confirm the save.
+You can choose to have the changed data (`$t.save`) any time, but you will be asked to confirm the save.
 
-You can also save the data in a new file: `$t.save-as: $stem`. Where `$stem` is the desired basename without a suffix. The new files will have the '.csv' and '-raw.csv' names (or your desired 'raw' file string).
+You can also save the data in a new file: `$t.save: $stem`. Where `$stem` is the desired basename without a suffix. The new files will have the '.csv' and '-raw.csv' names (or your desired 'raw' file string).
 
 DESCRIPTION
 ===========
 
-**CSV::Table** is a class enabling access to a CSV table's contents. Tables with a header row must have unique field names.
+**CSV::Table** is a class enabling access to a CSV table's contents. Tables with a header row must have unique field names. Input files are read immediately, so very large files may overwhelm system resources.
 
-By default, text is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single ones.
-
-Input files are read immediately, so very large files may overwhelm system resources.
+By default, text in a cell is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single ones. In this context, 'whitespace' is one or more characters in the set `(" ", "\t", "\n")`. Exceptions to that rule occur when the user wishes to use a newline in a cell or a tab is used as a cell separator. In those cases, some other character must be chosen as a line-ending or cell separator, and the newline or tab are **not** considered to be a whitespace character for the normalization algorithm. (See more details and examples below.)
 
 It can handle the following which other CSV handlers may not:
 
@@ -101,7 +99,7 @@ As simple as it is, it also has some uncommon features that are very useful:
 
   * Comment lines are allowed
 
-    This feature, which is not usual in CSV parsers, is to ignore comment lines interspersed between data lines (such lines may have leading whitespace). Data lines may have inline comments following a comment character. The comment character is user-definable and its presence invalidates its use as a field separator. The default comment character is '#'. Its use demonstrated:
+    This feature, which is not usual in CSV parsers, is to ignore comment lines interspersed between data lines (such lines may have leading whitespace). Data lines may also have inline comments following a comment character. The comment character is user-definable and its presence invalidates its use as a field separator. The default comment character is '#'. Its use demonstrated:
 
           # a comment preceding a data line
         1, 2, 3 # an inline comment following the data
@@ -110,19 +108,21 @@ As simple as it is, it also has some uncommon features that are very useful:
 
     Note comments are preserved and restored when the CSV file is saved.
 
-  * Save, Save as
+  * Save
 
-    There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel.
-
-    There is also a `save-as` method to change the names of the output files.
+    There is a `save` method which saves the current state of the CSV file (including comments) as well as saving a "raw" CSV file without the comments so the file can be used with conventional CSV handlers such as LibreOffice or Excel. The method can also be used to change the names of the output files.
 
   * Text normalization
 
-    Its results are to normalize text in a field, that is: leading and trailing whitespace is trimmed and interior whitespace is collapsed to one space between words. This is the default behavior but can be turned off if desired (`normalize=False`). In that event, data in all fields are still trimmed of leading and trailing whitespace (unless `trim=False`).
+    Its results are to normalize text in a field or cell, that is: leading and trailing whitespace is trimmed and interior whitespace is collapsed to one space between words. This is the default behavior but can be turned off if desired (`normalize=False`). In that event, data in all fields are still trimmed of leading and trailing whitespace (unless `trim=False`). Some examples:
+
+    Cell contents (line ending **not** a newline): `' Sally \n Jean '`; normalized: `'Sally\nJean'`.
+
+    Cell contents (tab **not** a cell separator): `Sally \t Jean `; normalized: `'Sally Jean'`.
 
   * Automatic determination of separator character
 
-    Unless the field separator is selected otherwise, the first line is searched for the most-used separator character from this list: `|`, `;`, `,` and `\t`. Other non-space characters may be used but are probably not tested. File an issue if you want to add a separator not currently specified.
+    Unless the field separator is selected otherwise, the default is 'auto' and the first data line is searched for the most-used separator character from this list: `|`, `;`, `,` and `\t`. Other non-space characters may be used but are probably not tested. File an issue if you want to add a separator not currently specified.
 
 Limitations
 -----------

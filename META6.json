@@ -9,7 +9,7 @@
     "YAMLish",
     "JSON::Fast",
     "File::Temp",
-    "Text::Utils:ver<3.4.1+>"
+    "Text::Utils:ver<3.4.2+>"
   ],
   "description": "Provides routines for manipulating a CSV file with or without a header row",
   "license": "Artistic-2.0",

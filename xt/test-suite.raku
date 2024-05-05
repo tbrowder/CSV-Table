@@ -1,7 +1,5 @@
 #!/usr/bin/env raku
 
-#use Test;
-
 use File::Temp;
 
 #use Text::Utils :ALL; #:strip-comment :normalize-string;
@@ -41,22 +39,28 @@ my $idx  = 0;
 my $pipe = 0;
 my $semi = 0;
 my ($LE, $SC, $CC);
+
+=begin comment
 constant \pipe   = "pipe";
 constant \nl     = "nl";
 constant \tab    = "tab";
 constant \hash   = "hash";
 constant \semi   = ";";
 constant \dashes = "--";
+=end comment
 
 # create a file that lists the test files
 my $flist = "$tdir/csv-test-input-files-list.txt";
 my $ft = open $flist, :w;
 
+# create a file that runs the test files
+my $fe = open "run-test-files.sh", :w;
+
 LE: for @line-endings -> $le {
-    # currently one of: \n || ;
+    # currently one of: \n || 
     $LE = get-abbrev $le;
 
-    note "DEBUG: line ending is \<$LE\>" if 0 and $debug;
+    note "DEBUG: line ending is '$LE'" if 0 and $debug;
     if $le ~~ /\n/ {
         note "DEBUG: line ending is a newline" if 0 and $debug;
     }
@@ -69,24 +73,29 @@ LE: for @line-endings -> $le {
         $CC = get-abbrev $cc;
 
         SC: for @sepchars -> $sc {
+            # currently one of: , ; | \t
             next SC if ?($le.comb (&) $sc.comb);
 
-            # currently one of: , ; | \t
             $SC = get-abbrev $sc;
-            note "DEBUG: sepchar '$SC'";
+            note "DEBUG: sepchar '$SC'" if 0 and $debug;
             next SC if $SC eq $CC;
-?($le.comb (&) $sc.comb);
 
             # semicolons cannot appear in more than one role
             # pipes and double pipes can only appear in one role
 
             my $comment = "Using mark ('$CC'), sepchar ('$SC'), line ending ('$LE')";
 
-            my $fnam = "csv-{$CC}-{$SC}.csv";
-            $fnam = "$odir/$fnam";
+            my $fnam  = "csv-{$CC}-{$SC}.csv";
+            my $fnamt = "csv-{$CC}-{$SC}.t";
+            $fnam     = "$odir/$fnam";
+            $fnamt    = "$odir/$fnamt";
 
             # write to the file name list
             $ft.say: $fnam;
+            $ft.say: $fnamt;
+
+            # write to the exe list
+            $fe.say: "raku -I. $fnamt";
         
             my $fh = open $fnam, :w, :nl-out($le); #, :!chomp;
             #===========
@@ -124,14 +133,35 @@ LE: for @line-endings -> $le {
             #===========
             $fh.close;
 
-            =begin comment
+            # write the test file
+            my $fht = open $fnamt, :w;
+
+            #=begin comment
+            $fht.print: q:to/HERE/;
+            use Test;
+            use Text::Utils :ALL;
+            use CSV::Table;
+            HERE
+
+            # insert var defs here TODO
+            $fht.print: qq:to/HERE/;
+            \# var defs
+            my \$fnam  = '{$fnam}';
+            my \$fnamt = '{$fnamt}';
+            my \$le    = '{$le}';
+            my \$sc    = '{$sc}';
+            my \$cc    = '{$cc}';
+            my \$debug = '{$debug}';
+            HERE
+
+            $fht.print: q:to/HERE/;
             # Now run tests on the generated file
-            note "DEBUG: testing file '$fnam'";
-            $fh = open $fnam, :r, :nl-in($le); #, :!chomp;
+            note "=== DEBUG: testing file '$fnam'";
+            my $fh = open $fnam, :r, :nl-in($le); #, :!chomp;
             LINE: for $fh.lines.kv -> $i, $line is copy {
-                note "  DEBUG line pre-strip : '$line'";
+                note "    DEBUG line pre-strip : '$line'";
                 $line = strip-comment $line, :first, :mark($cc);
-                note "  DEBUG line post-strip: '$line'";
+                note "    DEBUG line post-strip: '$line'";
                 if $i == 0 {
                     # the comment line
                     # line should be empty
@@ -147,6 +177,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # default
+                note "    DEBUG default normalize" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v;
                 }
@@ -162,10 +193,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -178,7 +209,7 @@ LE: for @line-endings -> $le {
                 #===================
 
                 #===================
-                note "DEBUG normalize tabs" if $debug;
+                note "    DEBUG normalize tabs" if $debug;
                 # normalize tabs
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :t<n>;
@@ -195,10 +226,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -212,7 +243,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # normalize newlines
-                note "DEBUG normalize newlines" if $debug;
+                note "    DEBUG normalize newlines" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :n<n>;
                 }
@@ -228,10 +259,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -245,7 +276,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # normalize tabs and newlines
-                note "DEBUG normalize tabs and newlines" if $debug;
+                note "    DEBUG normalize tabs and newlines" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :t<n>, :n<n>;
                 }
@@ -261,10 +292,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -278,7 +309,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # collapse to spaces
-                note "DEBUG collapse to spaces" if $debug;
+                note "    DEBUG collapse to spaces" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :c<s>;
                 }
@@ -294,10 +325,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally Jean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -311,7 +342,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # collapse to tabs
-                note "DEBUG collapse to tabs" if $debug;
+                note "    DEBUG collapse to tabs" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :c<t>;
                 }
@@ -327,10 +358,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally\tJean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally\tJean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -344,7 +375,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # collapse to newlines
-                note "DEBUG collapse to newlines" if $debug;
+                note "    DEBUG collapse to newlines" if $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v, :c<n>;
                 }
@@ -360,10 +391,10 @@ LE: for @line-endings -> $le {
                 }
                 elsif $i == 2 {
                     if $le ~~ /\n/ {
-                        is @tcells[0], "Sally Jean", "Sally with newline line ending";
+                        is @tcells[0], "Sally\nJean", "Sally with NL line ending";
                     }
                     else {
-                        is @tcells[0], "Sally\nJean", "Sally WITHOUT newline line ending";
+                        is @tcells[0], "Sally\nJean", "Sally WITHOUT NL line ending";
                     }
                     is @tcells[1], "22";
                     is @tcells[2], "";
@@ -375,8 +406,13 @@ LE: for @line-endings -> $le {
                 }
                 #===================
             }
+            done-testing;
             $fh.close;
-            =end comment
+            HERE
+            $fht.close;
+            ++$idx;
+            note "=== DEBUG: END testing file '$fnam'";
+            #=end comment
         }
     }
 }
