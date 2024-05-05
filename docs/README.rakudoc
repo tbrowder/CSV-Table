@@ -78,7 +78,7 @@ system resources.
 
 By default, text in a cell is 'normalized', that is, it is trimmed of leading
 and trailing whitespace and multiple contiguous interior whitespaces
-are collapsed into single ones. In this context, 'whitespace' is
+are collapsed into single space characters (' '). In this context, 'whitespace' is
 one or more characters in the set C<(" ", "\t", "\n")>.
 Exceptions to that rule occur when the user wishes to use a
 newline in a cell or a tab is used as a cell separator. 
@@ -158,16 +158,16 @@ Text normalization
 
 Its results are to normalize text in a field or cell, that is: leading and
 trailing whitespace is trimmed and interior whitespace is collapsed to
-one space between words.  This is the default behavior but can be
+one space character (' ') between words.  This is the default behavior, but it can be
 turned off if desired (C<normalize=False>).
 In that event, data in all fields are still trimmed of leading and trailing
 whitespace (unless C<trim=False>). Some examples:
 
-Cell contents (line ending B<not> a newline): C<' Sally \n Jean  '>; normalized:
-C<'Sally\nJean'>.
+Cell contents (line ending B<not> a newline): " Sally \n Jean "; normalized:
+"Sally\nJean".
 
-Cell contents (tab B<not> a cell separator): C< Sally \t Jean  >; normalized:
-C<'Sally Jean'>.
+Cell contents (tab B<not> a cell separator): " Sally \t Jean "; normalized:
+"Sally Jean".
 
 =end item
 
