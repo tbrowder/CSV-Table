@@ -67,7 +67,7 @@ DESCRIPTION
 
 **CSV::Table** is a class enabling access to a CSV table's contents. Tables with a header row must have unique field names. Input files are read immediately, so very large files may overwhelm system resources.
 
-By default, text in a cell is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single space characters (' '). In this context, 'whitespace' is one or more characters in the set `(" ", "\t", "\n")`. Exceptions to that rule occur when the user wishes to use a newline in a cell or a tab is used as a cell separator. In those cases, some other character must be chosen as a line-ending or cell separator, and the newline or tab are **not** considered to be a whitespace character for the normalization algorithm. (See more details and examples below.)
+By default, text in a cell is 'normalized', that is, it is trimmed of leading and trailing whitespace and multiple contiguous interior whitespaces are collapsed into single space characters (' '). In this context, 'whitespace' is one or more characters in the set (" ", "\t", "\n"). Exceptions to that rule occur when the user wishes to use a newline in a cell or a tab is used as a cell separator. In those cases, some other character must be chosen as a line-ending or cell separator, and the newline is **not** considered to be a whitespace character for the normalization algorithm while any tab not used as a cell separator is treated as whitespace. (See more details and examples below.)
 
 It can handle the following which other CSV handlers may not:
 
