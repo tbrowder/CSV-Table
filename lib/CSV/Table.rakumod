@@ -158,7 +158,7 @@ submethod TWEAK() {
         my $comment;
 
         # do NOT normalize in this step
-        ($line, $comment) = strip-comment $line, :normalize(False), :mark($cchar), 
+        ($line, $comment) = strip-comment $line, :normalize(False), :mark($cchar),
                                                  :save-comment;
         # Comment lines:
         # Save the line and retain its postion for reassembly.
@@ -413,7 +413,7 @@ method save($stem? is copy, :$force) {
             say "File '$csv' was not overwritten.";
         }
     }
-   
+
     if $wraw {
         my $fh = open $raw, :w, :nl-out($!line-ending);
         # Use proper sepchar, respect max col width # with sprintf
@@ -901,13 +901,17 @@ sub get-sepchar($header, :$debug) {
 
 } # sub get-sepchar
 
-enum CT is export(:CT) <yaml yam ya y yml ym json jso js j>;
+#enum CT is export(:CT) ( yaml=>0, yam=>1, ya=>2, y=>3, yml=>4, ym=>5, json=>6, jso=>7, js=>8, j=>9 );
+subset CT of Any is export(:CT) where { $_ ~~ /^ :i [0|yaml|yam|ya|y|yml|ym|json|jso|js|j]  /};
 method write-config(
     $f? is copy, # the suffix must be one of: .json, .yml, or .yaml
- CT :$type,
+ CT :$type is copy = 0,
     :$force,
     :$quiet,
 ) {
+
+    $type = Nil if $type eq "0";
+    #note "DEBUG: type = '$type'" if $type.defined;
 
     # the default config file type is YAML
     my $ftype = "YAML";
@@ -919,18 +923,18 @@ method write-config(
     with $type {
         # fatal if $f is defined
         if $f.defined {
-            die qq:to/HERE/;
+            die q:to/HERE/;
             FATAL: Both \$f and \$type are defined!
             HERE
         }
 
-        when $_ ~~ json|jso|js|j {
+        when $_ ~~ /^ :i [json|jso|js|j]/ {
             $wjson = $json;
             $fsuff = "json";
             $ftype = "JSON";
             $ostr  = $json;
         }
-        when $_ ~~ yaml|yam|ya|y|yml|ym {
+        when $_ ~~ /^ :i [yaml|yam|ya|y|yml|ym]/ {
             $wyaml = $yaml;
             $fsuff = "yml";
             $ftype = "YAML";
@@ -942,10 +946,13 @@ method write-config(
         if $f ~~ /'.' (\S+) $/ {
             my $suf = ~$0.lc;
             if $suf eq "yml" {
+                $f = "config-csv-table.yml";
             }
             elsif $suf eq "yaml" {
+                $f = "config-csv-table.yaml";
             }
             elsif $suf eq "json" {
+                $f = "config-csv-table.json";
             }
             else {
                 die qq:to/HERE/;
@@ -962,7 +969,9 @@ method write-config(
         $f = "config-csv-table.yml";
     }
     else {
-        die "FATAL: Unexpected failure. Please file an issue."
+        # default
+        #die "FATAL: Unexpected failure. Please file an issue."
+        $f = "config-csv-table.yml";
     }
 
     if $f.defined and $f.IO.e and $f.IO.r {

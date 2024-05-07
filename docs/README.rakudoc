@@ -65,7 +65,7 @@ You can choose to have the changed data (C<$t.save>) any time, but
 you will be asked to confirm the save.
 
 You can also save the data in a new file: C<$t.save: $stem>. Where
-C<$stem> is the desired basename without a suffix. The new files 
+C<$stem> is the desired basename without a suffix. The new files
 will have the '.csv' and '-raw.csv' names (or your desired 'raw' file
 string).
 
@@ -76,18 +76,17 @@ contents. Tables with a header row must have unique field names.
 Input files are read immediately, so very large files may overwhelm
 system resources.
 
-By default, text in a cell is 'normalized', that is, it is trimmed of leading
-and trailing whitespace and multiple contiguous interior whitespaces
-are collapsed into single space characters (' '). In this context, 'whitespace' is
-one or more characters in the set (" ", "\t", "\n").
-Exceptions to that rule occur when the user wishes to use a
-newline in a cell or a tab is used as a cell separator. 
-In those cases, some other character must be
-chosen as a line-ending or cell separator, and the newline is
-B<not> considered to be a
-whitespace character for the normalization algorithm while
-any tab not used as a cell separator is treated as whitespace. (See more
-details and examples below.)
+By default, text in a cell is 'normalized', that is, it is trimmed of
+leading and trailing whitespace and multiple contiguous interior
+whitespaces are collapsed into single space characters (' '). In this
+context, 'whitespace' is one or more characters in the set (" ", "\t",
+"\n").  Exceptions to that rule occur when the user wishes to use a
+newline in a cell or a tab is used as a cell separator.  In those
+cases, some other character must be chosen as a line-ending or cell
+separator, and the newline is B<not> considered to be a whitespace
+character for the normalization algorithm while any tab not used as a
+cell separator is treated as whitespace. (See more details and
+examples below.)
 
 It can handle the following which other CSV handlers may not:
 
@@ -128,11 +127,11 @@ zero-indexed cell indices of the desired sub-array.
 Comment lines are allowed
 
 This feature, which is not usual in CSV parsers, is to ignore comment
-lines interspersed between data lines (such lines may have leading whitespace).
-Data lines may also have inline comments following a comment character.
-The comment character is user-definable and its presence invalidates its
-use as a field separator. The default comment character is '#'. Its use
-demonstrated:
+lines interspersed between data lines (such lines may have leading
+whitespace).  Data lines may also have inline comments following a
+comment character.  The comment character is user-definable and its
+presence invalidates its use as a field separator. The default comment
+character is '#'. Its use demonstrated:
 
 =begin code
   # a comment preceding a data line
@@ -147,22 +146,24 @@ Note comments are preserved and restored when the CSV file is saved.
 =begin item
 Save
 
-There is a C<save> method which saves the current state of the CSV file
-(including comments) as well as saving a "raw" CSV file without the
-comments so the file can be used with conventional CSV handlers such as
-LibreOffice or Excel.  The method can also be used to change the names of the output
-files.
+There is a C<save> method which saves the current state of the CSV
+file (including comments) as well as saving a "raw" CSV file without
+the comments so the file can be used with conventional CSV handlers
+such as LibreOffice or Excel.  The method can also be used to change
+the names of the output files.
+
 =end item
 
 =begin item
 Text normalization
 
-Its results are to normalize text in a field or cell, that is: leading and
-trailing whitespace is trimmed and interior whitespace is collapsed to
-one space character (' ') between words.  This is the default behavior, but it can be
-turned off if desired (C<normalize=False>).
-In that event, data in all fields are still trimmed of leading and trailing
-whitespace unless you also set C<trim=False>). Some examples:
+Its results are to normalize text in a field or cell, that is: leading
+and trailing whitespace is trimmed and interior whitespace is
+collapsed to one space character (' ') between words.  This is the
+default behavior, but it can be turned off if desired
+(C<normalize=False>).  In that event, data in all fields are still
+trimmed of leading and trailing whitespace unless you also set
+C<trim=False>). Some examples:
 
 Cell contents (line ending B<not> a newline): " Sally \n Jean "; normalized:
 "Sally\nJean".
@@ -175,11 +176,12 @@ Cell contents (tab B<not> a cell separator): " Sally \t Jean "; normalized:
 =begin item
 Automatic determination of separator character
 
-Unless the field separator is selected otherwise, the default is 'auto'
-and the first data line is searched for the most-used separator character from
-this list: C<|>, C<;>, C<,> and C<\t>.  Other non-space characters may be used
-but are probably not tested. File an issue if you want to add a
-separator not currently specified.
+Unless the field separator is selected otherwise, the default is
+'auto' and the first data line is searched for the most-used separator
+character from this list: C<|>, C<;>, C<,> and C<\t>.  Other non-space
+characters may be used but are probably not tested. File an issue if
+you want to add a separator not currently specified.
+
 =end item
 
 =head2 Limitations
@@ -214,17 +216,23 @@ my $t = CSV::Table.new: :$csv,
 
 Following are the allowable values for the named arguments. The user
 is cautioned that unspecified values are probably not tested. File an
-issue if your value of choice is not specified and it can be added
-and tested for.
+issue if your value of choice is not specified and it can be added and
+tested for.
 
-There are a lot of options, one or all of which can be defined in
-a JSON configuration file whose path is provided by the C<config>
-option. The user may get a prefilled config file by executing:
+There are a lot of options, one or all of which can be defined in a
+YAML (or JSON) configuration file whose path is provided by the
+C<config> option. The user may get a prefilled YAML config file by
+executing:
 
 =begin code
 $ raku -e'use CSV::Table; CSV::Table.write-config'
-See CSV::Table JSON configuration file 'config-csv-table.json'
+See CSV::Table JSON configuration file 'config-csv-table.yml'
 =end code
+
+or
+
+$ raku -e'use CSV::Table; CSV::Table.write-config'
+See CSV::Table JSON configuration file 'config-csv-table.yml'
 
 Alternatively, you can call the method on a CSV::Table object in the REPL:
 
@@ -232,7 +240,7 @@ Alternatively, you can call the method on a CSV::Table object in the REPL:
 $ raku
 > use CSV::Table;
 > CSV::Table.write-config
-See CSV::Table JSON configuration file 'config-csv-table.json'
+See CSV::Table YAML configuration file 'config-csv-table.yml'
 =end code
 
 =item C<:$separator>
@@ -269,8 +277,9 @@ See CSV::Table JSON configuration file 'config-csv-table.json'
 =head2 Accessing the table
 
 The following table shows how to access each cell in a table C<$t>
-with a header row plus C<R> rows and C<C> columns of data.
-(In matrix terminology it is an C<M x N> rectangular matrix with C<M> rows and C<N> columns.)
+with a header row plus C<R> rows and C<C> columns of data.  (In matrix
+terminology it is an C<M x N> rectangular matrix with C<M> rows and
+C<N> columns.)
 
 =begin table
 $t.field[0] | ... | $t.field[C-1]
@@ -288,13 +297,13 @@ $t.col{$field-name}{$row-number}
 =head1 Possible new features
 
 The following features can be implemented fairly easily if users
-want it and file an issue. 
+want it and file an issue.
 
 =item add row names
 =item add new rows or columns
 =item delete rows or columns
-=item row sum and average 
-=item column sum and average 
+=item row sum and average
+=item column sum and average
 =item normalize comments
 
 Other matrix-related features could be implemented, but most are
