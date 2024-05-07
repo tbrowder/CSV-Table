@@ -1,16 +1,25 @@
 #!/usr/bin/env raku
 
-use Test;
-
 use File::Temp;
 
 use lib "./t/data/lib";
 use Utils;
 
+if not @*ARGS {
+    print qq:to/HERE/;
+    Usage: ./xt/{$*PROGRAM.basename}
+
+    Execute this file to generate test files in directory "xt".
+    HERE
+    exit;
+}
+
 my $debug = 0; # output files are placed in local dir "tmp"
 
 # test saving in a temp dir
-my $tdir = $debug ?? "./xt/tmp" !! tempdir;
+#my $tdir = $debug ?? "./xt/tmp" !! tempdir;
+my $tdir = "./xt";
+
 mkdir $tdir;
 mkdir "$tdir/nl";
 mkdir "$tdir/dpipe";
@@ -145,12 +154,12 @@ LE: for @line-endings -> $le {
 
             $fht.print: q:to/HERE/;
             # Now run tests on the generated file
-            note "=== DEBUG: testing file '$fnam'" if $debug;
+            note "=== DEBUG: testing file '$fnam'" if 0 and $debug;
             my $fh = open $fnam, :r, :nl-in($le); #, :!chomp;
             LINE: for $fh.lines.kv -> $i, $line is copy {
-                note "    DEBUG line pre-strip : '$line'" if $debug;
+                note "    DEBUG line pre-strip : '$line'" if 0 and $debug;
                 $line = strip-comment $line, :first, :mark($cc);
-                note "    DEBUG line post-strip: '$line'" if $debug;
+                note "    DEBUG line post-strip: '$line'" if 0 and $debug;
                 if $i == 0 {
                     # the comment line
                     # line should be empty
@@ -166,7 +175,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # default
-                note "    DEBUG default normalize" if $debug;
+                note "    DEBUG default normalize" if 0 and $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = normalize-string $v;
                 }
@@ -200,7 +209,7 @@ LE: for @line-endings -> $le {
                 #===================
                 # normalize=False
                 #  (but trim=True)
-                note "    DEBUG normalize=False (but trim=True)" if $debug;
+                note "    DEBUG normalize=False (but trim=True)" if 0 and $debug;
                 for @cells.kv -> $i, $v is copy {
                     $v .= trim;
                     @tcells[$i] = $v;
@@ -234,7 +243,7 @@ LE: for @line-endings -> $le {
 
                 #===================
                 # trim=False (and normalize=False)
-                note "    DEBUG trim=False (and normalize=False)" if $debug;
+                note "    DEBUG trim=False (and normalize=False)" if 0 and $debug;
                 for @cells.kv -> $i, $v is copy {
                     @tcells[$i] = $v;
                 }
@@ -270,12 +279,11 @@ LE: for @line-endings -> $le {
             HERE
             $fht.close;
             ++$idx;
-            note "=== DEBUG: END testing file '$fnam'" if $debug;
+            note "=== DEBUG: END testing file '$fnam'" if 0 and $debug;
             #=end comment
         }
     }
 }
-note "Wrote $idx test files" if $debug;
+note "Wrote $idx test files" if 0 and $debug;
 
-done-testing;
 

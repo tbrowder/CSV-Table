@@ -1,3 +1,5 @@
 .precomp/
 /CSV-Table-*
 tmp/
+xt/nl/
+xt/dpipe/
