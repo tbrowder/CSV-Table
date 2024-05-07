@@ -114,7 +114,7 @@ As simple as it is, it also has some uncommon features that are very useful:
 
   * Text normalization
 
-    Its results are to normalize text in a field or cell, that is: leading and trailing whitespace is trimmed and interior whitespace is collapsed to one space character (' ') between words. This is the default behavior, but it can be turned off if desired (`normalize=False`). In that event, data in all fields are still trimmed of leading and trailing whitespace (unless `trim=False`). Some examples:
+    Its results are to normalize text in a field or cell, that is: leading and trailing whitespace is trimmed and interior whitespace is collapsed to one space character (' ') between words. This is the default behavior, but it can be turned off if desired (`normalize=False`). In that event, data in all fields are still trimmed of leading and trailing whitespace unless you also set `trim=False`). Some examples:
 
     Cell contents (line ending **not** a newline): " Sally \n Jean "; normalized: "Sally\nJean".
 
@@ -138,6 +138,8 @@ It cannot currently handle:
   * duplicate field names in a header line
 
   * duplicate row names
+
+Also, quoted words are not specially treated nor are unbalanced quote characters detected.
 
 Constructor with default options
 --------------------------------
@@ -211,7 +213,7 @@ Alternatively, you can call the method on a CSV::Table object in the REPL:
 
     * `String`
 
-  * `:$emmpty-cell-value`
+  * `:$empty-cell-value`
 
     * `''` [default]
 

@@ -2,11 +2,12 @@ unit class CSV::Table;
 
 use JSON::Fast;
 use YAMLish;
-use Text::Utils :strip-comment, :normalize-text, :count-substrs;
+use Text::Utils :strip-comment, :normalize-string, :count-substrs;
 
 has $.csv; #is required;
 
 # the default strings:
+# YAML
 constant $yaml = q:to/HERE/;
 separator:        auto # auto, comma, pipe, semicolon, tab
 trim:             true
@@ -19,6 +20,7 @@ empty-cell-value: ""
 has-row-names:    false
 HERE
 
+# JSON
 constant $json = q:to/HERE/;
 {
 "separator":        "auto",
@@ -152,7 +154,9 @@ submethod TWEAK() {
         note "DEBUG: line = $line" if $debug;
         my $comment;
 
-        ($line, $comment) = strip-comment $line, :mark($cchar), :save-comment;
+        # do NOT normalize in this step
+        ($line, $comment) = strip-comment $line, :normalize(False), :mark($cchar), 
+                                                 :save-comment;
         # Comment lines:
         # Save the line and retain its postion for reassembly.
         # We use the %!comment hash with a key as the index number
@@ -216,6 +220,12 @@ submethod TWEAK() {
     my $nfields = 0;
     my $ncols   = 0;
     my $row; # holds a Line object
+
+    # tweak some settings: trim and normalize
+    if not $!trim {
+        $!normalize = False;
+    }
+
     if $!has-header {
         # TODO handle row names
         if not @lines.elems {
@@ -629,10 +639,15 @@ Bool :$has-row-names!,
         }
 
         if $normalize {
-            $v = normalize-text $v;
+            # includes trimming
+            $v = normalize-string $v;
         }
         elsif $trim {
+            # trim only
             $v .= trim;
+        }
+        else {
+            ; # no-op, keep the original data
         }
 
         # track the max column width
@@ -747,11 +762,17 @@ Bool :$trim!,
         else {
             @res.push: 'ok';
         }
+
         if $normalize {
-            $v = normalize-text $v;
+            # includes trimming
+            $v = normalize-string $v;
         }
         elsif $trim {
+            # trim only
             $v .= trim;
+        }
+        else {
+            ; # no-op, keep the original data
         }
 
         # track the max column width

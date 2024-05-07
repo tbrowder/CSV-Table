@@ -162,7 +162,7 @@ trailing whitespace is trimmed and interior whitespace is collapsed to
 one space character (' ') between words.  This is the default behavior, but it can be
 turned off if desired (C<normalize=False>).
 In that event, data in all fields are still trimmed of leading and trailing
-whitespace (unless C<trim=False>). Some examples:
+whitespace unless you also set C<trim=False>). Some examples:
 
 Cell contents (line ending B<not> a newline): " Sally \n Jean "; normalized:
 "Sally\nJean".
@@ -191,6 +191,9 @@ It cannot currently handle:
 =item binary data
 =item duplicate field names in a header line
 =item duplicate row names
+
+Also, quoted words are not specially treated nor are unbalanced quote
+characters detected.
 
 =head2 Constructor with default options
 
@@ -259,7 +262,7 @@ See CSV::Table JSON configuration file 'config-csv-table.json'
 =item2 C<"\n"> [default]
 =item2 C<String>
 
-=item C<:$emmpty-cell-value>
+=item C<:$empty-cell-value>
 =item2 C<''> [default]
 =item2 C<String>
 
