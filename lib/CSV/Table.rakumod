@@ -62,7 +62,7 @@ has @.rowname; # array of row names, if $has-row-names
 # hashes
 has %.col;     # field name => slice of that col from @rows
 has %.colnum;  # field name => col number
-has %.colname; # col number => field name
+has %.coltag;  # col number => field name
 
 has %.row;     # row name   => an element of @rows
 has %.rownum;  # row name   => row number
@@ -73,6 +73,8 @@ has %.comment; # @lines index number (includes any header) => Comment
 # other
 has @.col-width; # max col width in number of characters (.chars)
                  # includes any header row
+has $.row-width; # max rowname width in number of characters (.chars)
+                 # (if $!has-row-names)
 
 class Comment {
     has $.inline   = 0;  # inline after the comment char
@@ -89,6 +91,7 @@ class Line {
 }
 
 submethod TWEAK() {
+    $!row-width = 0;
     my $debug = 0;
 
     # Read any config file
@@ -235,6 +238,14 @@ submethod TWEAK() {
         $row = process-header $header, :separator($!separator),
                               :has-row-names($!has-row-names),
                               :normalize($!normalize), :trim($!trim);
+        if $!has-row-names {
+            # assign row name data
+            $!ulname = $row.rname;
+            if $row.rwid > $!row-width {
+                $!row-width = $row.rwid:
+            }
+        }
+
         # fields are cleaned, trailing empty cells are removed
         #   (but reported) and column widths are initialized
         # assign data to:
@@ -248,11 +259,11 @@ submethod TWEAK() {
         # assign data to:
         #   %!col;     # field name => @rows
         #   %!colnum;  # field name => col number
-        #   %!colname; # col number => field name
+        #   %!coltag;  # col number => field name
         for @!field.kv -> $i, $nam {
             %!col{$nam} = []; # array of colunm values
             %!colnum{$nam} = $i;
-            %!colname{$i}  = $nam;
+            %!coltag{$i}   = $nam;
         }
     }
     else {
@@ -279,6 +290,24 @@ submethod TWEAK() {
                                    :has-header($!has-header), :$nfields,
                                    :empty-cell-value($!empty-cell-value),
                                    :normalize($!normalize), :trim($!trim);
+
+        if $!has-row-names {
+            # assign row name data
+            if $row.rwid > $!row-width {
+                $!row-width = $row.rwid:
+            }
+            @!rowname.push: $row.rname;
+
+            # don't forget the cross-reference data
+            #note "DEBUG: Tom, fix this";
+            # has %.row;     # row name   => an element of @rows
+            # has %.rownum;  # row name   => row number ($line-number)
+            # has %.rowtag;  # row number => row name
+            %!row{$row.rname}    = $line-num;
+            %!rownum{$row.rname} = $line-num;
+            %!rowtag{$line-num}  = $row.rname;
+        }
+
         # assign data to:
         #   @!cell and @!col-width
         #   %!col;     # field name => @rows
@@ -294,8 +323,8 @@ submethod TWEAK() {
                 @!col-width[$i] = $rw;
             }
 
-            # don't forget the data hash
-            my $nam = %!colname{$i};
+            # don't forget the cross-reference data
+            my $nam = %!coltag{$i};
             %!col{$nam}.push: $s;
         }
     }
@@ -620,6 +649,23 @@ Bool :$has-row-names!,
     # assign data to:
     #   @!field and @!col-width
 
+    if $has-row-names {
+        my $v = @arr.shift;
+        if $normalize {
+            # includes trimming
+            $v = normalize-string $v;
+        }
+        elsif $trim {
+            # trim only
+            $v .= trim;
+        }
+        else {
+            ; # no-op, keep the original data
+        }
+        $o.rname = $v;
+        $o.rwid  = $v.chars;
+    }
+
     my %field; # name => index
     my %dups;  # name => [] # list of indices
 
@@ -750,6 +796,23 @@ Bool :$trim!,
 ) {
     my @arr = $line.split(/$separator/);
     my $o = Line.new;
+
+    if $has-row-names {
+        my $v = @arr.shift;
+        if $normalize {
+            # includes trimming
+            $v = normalize-string $v;
+        }
+        elsif $trim {
+            # trim only
+            $v .= trim;
+        }
+        else {
+            ; # no-op, keep the original data
+        }
+        $o.rname = $v;
+        $o.rwid  = $v.chars;
+    }
 
     my @ei;  # indices of empty cells
     my @res; # results (empty or ok)

@@ -18,6 +18,12 @@ is $t.field.elems, 6, "field elems 6";
 is $t.field[0], 'jan', "field 0 'jan'";
 is $t.field[5], 'jun', "field 5 'jun'";
 
+is $t.ulname, "row/col";
+is $t.rowname[0], "water";
+is $t.rowname[1], "electricity";
+is $t.rowname[2], "gas";
+is $t.row-width, 11;
+
 done-testing;
 =finish
 
