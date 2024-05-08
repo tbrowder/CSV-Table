@@ -256,8 +256,10 @@ See CSV::Table JSON configuration file 'config-csv-table.yml'
 
 or
 
-$ raku -e'use CSV::Table; CSV::Table.write-config'
-See CSV::Table JSON configuration file 'config-csv-table.yml'
+=begin code
+$ raku -e'use CSV::Table; CSV::Table.write-config(:type<json>)'
+See CSV::Table JSON configuration file 'config-csv-table.json'
+=end code
 
 Alternatively, you can call the method on a CSV::Table object in the REPL:
 
@@ -299,6 +301,10 @@ See CSV::Table YAML configuration file 'config-csv-table.yml'
 =item2 C<''> [default]
 =item2 C<String>
 
+=item C<:$has-row-names>
+=item2 C<False> [default]
+=item2 C<True>
+
 =head2 Accessing the table
 
 The following table shows how to access each cell in a table C<$t>
@@ -317,6 +323,13 @@ The table's data cells can also be accessed by field name and row number:
 
 =begin code
 $t.col{$field-name}{$row-number}
+=end code
+
+If row names are provided, data cells can be accessed by row and column
+names:
+
+=begin code
+$t.rowcol: $row-name, $field-name
 =end code
 
 =head1 Possible new features
