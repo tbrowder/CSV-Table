@@ -71,9 +71,9 @@ has %.rowtag;  # row number => row name
 has %.comment; # @lines index number (includes any header) => Comment
 
 # other
-has @.col-width; # max col width in number of characters (.chars)
-                 # includes any header row
-has $.row-width; # max rowname width in number of characters (.chars)
+has @.col-width;     # max col width in number of characters (.chars)
+                     # includes any header row
+has $.rowname-width; # max rowname width in number of characters (.chars)
                  # (if $!has-row-names)
 
 class Comment {
@@ -91,7 +91,7 @@ class Line {
 }
 
 submethod TWEAK() {
-    $!row-width = 0;
+    $!rowname-width = 0;
     my $debug = 0;
 
     # Read any config file
@@ -241,8 +241,8 @@ submethod TWEAK() {
         if $!has-row-names {
             # assign row name data
             $!ulname = $row.rname;
-            if $row.rwid > $!row-width {
-                $!row-width = $row.rwid:
+            if $row.rwid > $!rowname-width {
+                $!rowname-width = $row.rwid:
             }
         }
 
@@ -293,8 +293,8 @@ submethod TWEAK() {
 
         if $!has-row-names {
             # assign row name data
-            if $row.rwid > $!row-width {
-                $!row-width = $row.rwid:
+            if $row.rwid > $!rowname-width {
+                $!rowname-width = $row.rwid:
             }
             @!rowname.push: $row.rname;
 
@@ -578,19 +578,30 @@ method shape(:$show) {
     self.rows, self.cols
 }
 
-multi method rowcol($r, $c) {
+multi method rowcol(Int $r, Int $c) {
     @!cell[$r][$c];
 }
-multi method rowcol($r, $c, $val) {
+multi method rowcol(Int $r, Int $c, $val) {
     @!cell[$r][$c] = $val;
 }
 
-method rc($r, $c) { self.rowcol($r, $c) }
-method ij($r, $c) { self.rowcol($r, $c) }
+multi method rowcol(Str $r, Str $c) {
+    my $a = %!rownum{$r};
+    my $b = %!colnum{$c};
+    @!cell[$a][$b];
+}
+multi method rowcol(Str $r, Str $c, $val) {
+    my $a = %!rownum{$r};
+    my $b = %!colnum{$c};
+    @!cell[$a][$b] = $val;
+}
 
-method colrow($c, $r) { self.rowcol($r, $c) }
-method cr($c, $r) { self.rowcol($r, $c) }
-method ji($c, $r) { self.rowcol($r, $c) }
+multi method rc(Int $r, Int $c) { self.rowcol($r, $c) }
+multi method ij(Int $r, Int $c) { self.rowcol($r, $c) }
+
+multi method colrow(Int $c, Int $r) { self.rowcol($r, $c) }
+multi method cr(Int $c, Int $r) { self.rowcol($r, $c) }
+multi method ji(Int $c, Int $r) { self.rowcol($r, $c) }
 
 # convenience methods
 method fields  { @!field.elems     }

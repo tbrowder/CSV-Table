@@ -1,9 +1,5 @@
 + change of sepchar and save
 
-+ add row names
-  are headers required?
-  define upper-left corner
-
 + add row sum and average
 
 + have adding or deleting cells and fields
@@ -40,6 +36,10 @@
 
 + numbers should remain numbers if not in quotes
   (see allomorph handling in docs)
+
++ add row names
+  are headers required? yes
+  define upper-left corner
 
 ====================
 == WILL NOT DO ===

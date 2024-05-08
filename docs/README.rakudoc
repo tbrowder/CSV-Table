@@ -69,6 +69,13 @@ C<$stem> is the desired basename without a suffix. The new files
 will have the '.csv' and '-raw.csv' names (or your desired 'raw' file
 string).
 
+You can define a CSV table with row names using the '$has-row-names'
+option to the constructor and query the table by row name and column name.
+
+=begin code :lang<raku>
+say $t.rowcol("water", "Feb"); # OUTPUT: «10.80␤»
+=end code
+
 =head1 DESCRIPTION
 
 B<CSV::Table> is a class enabling access to a CSV table's
@@ -112,6 +119,9 @@ field0, field1, field2,
 =item Without a header line
 =item2 data lines are padded with empty fields to the maximum number of fields
 found in the file (or the user's chosen value)
+
+=item Either case
+=item2 May use newlines in a cell if a different line ending is specified
 
 As simple as it is, it also has some uncommon features that are very
 useful:
@@ -181,6 +191,21 @@ Unless the field separator is selected otherwise, the default is
 character from this list: C<|>, C<;>, C<,> and C<\t>.  Other non-space
 characters may be used but are probably not tested. File an issue if
 you want to add a separator not currently specified.
+=end item
+
+=begin item
+Row names
+
+Row names can be used if the "$has-row-names" option is entered with
+the constructor. Then you can get cell values by row and column
+name as shown in this example repeated from above:
+
+=begin code :lang<raku>
+say $t.rowcol("water", "Feb"); # OUTPUT: «10.80␤»
+=end code
+
+Note the names are case sensitive.  A non-case-sensitive option may
+be provided in a future release.
 
 =end item
 
@@ -299,7 +324,7 @@ $t.col{$field-name}{$row-number}
 The following features can be implemented fairly easily if users
 want it and file an issue.
 
-=item add row names
+=item non-case-sensitive row and column names
 =item add new rows or columns
 =item delete rows or columns
 =item row sum and average

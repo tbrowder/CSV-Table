@@ -22,22 +22,19 @@ is $t.ulname, "row/col";
 is $t.rowname[0], "water";
 is $t.rowname[1], "electricity";
 is $t.rowname[2], "gas";
-is $t.row-width, 11;
+is $t.rowname-width, 11;
 
-done-testing;
-=finish
+is $t.cell[0][0], '$20';
+is $t.cell[0][1], '10.80';
 
-is $t.cell.elems, 1;
+is $t.rowcol(0, 1), "10.80";
+is $t.rowcol("water", "feb"), "10.80";
 
-is $t.cell[0].elems, 2;
-is $t.cell[0][0], 'Sally Jean';
-is $t.cell[0][1], '21';
+# a new input file
+$csv  = 't/data/row-names2.csv';
 
-is $t.raw-csv, 't/data/commented-raw.csv', 'in same dir as src csv';
-$t.save: :force;
-
-my $s1 = slurp $csv;
-my $s2 = slurp $csv2;
+$t = CSV::Table.new: :$csv, :has-row-names;
+is $t.ulname, "";
 
 done-testing;
 

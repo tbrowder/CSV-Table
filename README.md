@@ -62,6 +62,12 @@ You can choose to have the changed data (`$t.save`) any time, but you will be as
 
 You can also save the data in a new file: `$t.save: $stem`. Where `$stem` is the desired basename without a suffix. The new files will have the '.csv' and '-raw.csv' names (or your desired 'raw' file string).
 
+You can define a CSV table with row names using the '$has-row-names' option to the constructor and query the table by row name and column name.
+
+```raku
+say $t.rowcol("water", "Feb"); # OUTPUT: «10.80␤»
+```
+
 DESCRIPTION
 ===========
 
@@ -90,6 +96,10 @@ This header line is **not** valid (notice the ending comma has no text following
   * Without a header line
 
     * data lines are padded with empty fields to the maximum number of fields found in the file (or the user's chosen value)
+
+  * Either case
+
+    * May use newlines in a cell if a different line ending is specified
 
 As simple as it is, it also has some uncommon features that are very useful:
 
@@ -123,6 +133,16 @@ As simple as it is, it also has some uncommon features that are very useful:
   * Automatic determination of separator character
 
     Unless the field separator is selected otherwise, the default is 'auto' and the first data line is searched for the most-used separator character from this list: `|`, `;`, `,` and `\t`. Other non-space characters may be used but are probably not tested. File an issue if you want to add a separator not currently specified.
+
+  * Row names
+
+    Row names can be used if the "$has-row-names" option is entered with the constructor. Then you can get cell values by row and column name as shown in this example repeated from above:
+
+    ```raku
+    say $t.rowcol("water", "Feb"); # OUTPUT: «10.80␤»
+    ```
+
+    Note the names are case sensitive. A non-case-sensitive option may be provided in a future release.
 
 Limitations
 -----------
@@ -243,7 +263,7 @@ Possible new features
 
 The following features can be implemented fairly easily if users want it and file an issue.
 
-  * add row names
+  * non-case-sensitive row and column names
 
   * add new rows or columns
 
