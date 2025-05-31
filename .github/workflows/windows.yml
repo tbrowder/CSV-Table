@@ -25,7 +25,6 @@ jobs:
       - uses: Raku/setup-raku@v1
       - name: Install Dependencies
         run: |
-            choco install rakudostar
-            zef --exclude="z" install --debug --/test --test-depends --deps-only .
-      - name: Run Tests
-        run: zef install . --debug
+            zef --debug --/test --test-depends --deps-only .
+      - name: Install
+        run: zef install .
