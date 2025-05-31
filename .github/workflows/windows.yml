@@ -25,6 +25,6 @@ jobs:
       - uses: Raku/setup-raku@v1
       - name: Install Dependencies
         run: |
-            zef --debug --/test --test-depends --deps-only .
+            zef install --/test --deps-only .
       - name: Install
         run: zef install .
